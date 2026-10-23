@@ -1,36 +1,28 @@
 # Changelog
 
-## 0.0.1 — 2026-10-23
-- Selected You're the Distraction for Open Innovation Puzzles.
-- Added implementation handoff, agent instructions, initial prompt log and version workflow.
-- No game implementation or GitHub publication yet.
+## Unreleased
 
-## Planned (not released)
-- 0.1.0: working simulation and one validated level.
-- 0.2.0: three validated levels.
-- 1.0.0: polished and tested submission.
-
-## 0.2.0 — 2026-10-23
-- Replaced the original ghost concept with the user's three-act office escape.
-- Implemented report sequencing, two conversation puzzles, HR patrol and boss runner.
-- Added original canvas office art, mobile buttons, keyboard controls, pause, calm mode, opt-in synthesized sound, win/loss and restart.
-- Six deterministic logic tests pass, including a breadth-first HR solver and chase solutions.
-- First two acts completed in browser QA; final browser QA follows in 1.0.0.
-- Fixed source being excluded by the initial dist/ ignore rule.
-- Skipped separate v0.1.0 checkpoint because all three engines were implemented together; no fabricated historical release.
+### Documentation
+- Consolidate engineering documentation under `docs/`.
+- Rewrite the README around gameplay, setup, architecture and verification.
+- Remove duplicate agent handoffs, workspace hosting metadata and superseded setup notes from the submission tree.
+- Retain AI evidence, original development records and validation coverage.
 
 ## 1.0.0 — 2026-10-23
-- Added orientation-aligned AI log, chronological prompt history, 60-second pitch, rubric checklist and test report.
-- Added an Antigravity continuation guide and Windows local launch shortcut.
-- Added visible file-fall incident animation before the boss chase.
-- Browser-verified both puzzle acts, runner controls, pause, calm mode, defeat and retry.
-- Full runner victory verified in engine tests; full browser victory and physical-phone testing remain explicitly unverified.
-- Preserved the original GitHub README commit; connector imports record real checkpoint uploads without rewriting main.
 
-### Delivery record
-Public GitHub source and private Sites deployment verified. README and DEPLOYMENT.md identify the private audience and local jury-demo fallback. Antigravity backup includes source plus local tagged Git history.
+- Complete the three-act office escape, including the falling-file incident and boss chase.
+- Add keyboard and on-screen controls, level replay, pause, Calm mode and opt-in audio.
+- Add submission evidence, pitch and validation documentation.
+- Publish public source and an owner-private playable preview.
+- Record six passing engine tests and desktop browser checks; full browser chase victory and physical-phone testing remain pending.
 
-## Documentation revision — 2026-10-23
-- Reorganized AI_LOG.md into seven structured retrospective prompt briefs with objectives, constraints, acceptance criteria and recorded outcomes.
-- Preserved actual requests in PROMPT_LOG.md and retained verification limits and observed corrections.
-- Documentation-only change; game version remains 1.0.0.
+## 0.2.0 — 2026-10-23
+
+- Implement report sequencing, two conversation puzzles, a fixed HR patrol and a three-lane runner.
+- Add original Canvas artwork and deterministic state-transition tests.
+- Verify HR solvability with breadth-first search.
+- Correct source ignore rules and the patrol board’s lower margin.
+
+## 0.0.1 — 2026-10-23
+
+- Establish the initial concept, implementation brief and prompt record.

@@ -1,54 +1,68 @@
-# You're the Distraction — Team Index 0
+# You're the Distraction
 
-A browser-based office escape for **Pixathon: Open Innovation Puzzles**.
+**Your shift is over. Your office disagrees.**
 
-**It is 5:01. Finish your work, outsmart the office, and reclaim your evening.**
+A three-act browser escape game built for Pixathon’s Open Innovation Puzzles track. Finish a report, negotiate your way out of unwanted conversations, read HR’s patrol, and outrun one final follow-up.
 
-## Three levels
-1. **The Cubicle:** complete a report sequence, then choose contextual replies to escape two colleagues' conversations.
-2. **HR Has Eyes:** slip past an HR character moving along a fixed, visible patrol.
-3. **The Final Follow-up:** a falling file alerts the boss; dodge cabinets and jump paper stacks in a three-lane chase.
+## Gameplay
 
-HTML, CSS, JavaScript modules and Canvas. No build or paid API needed. Original code-drawn artwork; opt-in Web Audio sounds. Google Fonts is optional; fallback fonts keep gameplay usable if it is blocked.
+| Act | Challenge | Core interaction |
+| --- | --- | --- |
+| The Cubicle | Complete your work and escape two conversations | Sequence tasks and choose contextual replies |
+| HR Has Eyes | Reach the exit without being spotted | Plan moves against a fixed patrol and visible sight area |
+| The Final Follow-up | A falling file alerts the boss | Switch lanes, jump papers and dodge cabinets across 15 waves |
 
-## Play locally
-With Python installed, run from this repository:
+Short retries, contextual feedback, level replay and a slower chase mode keep the game approachable. Artwork is rendered in Canvas; optional sound uses Web Audio.
+
+## Run locally
+
+From the repository root:
 
 ```sh
 python -m http.server 8000 --directory dist
 ```
-Then open http://localhost:8000 in a browser. Use a web server, not a file:// URL, because the game imports JavaScript modules.
+
+Open **http://localhost:8000**. On Windows, `scripts/start-windows.bat` starts the same server when Python is installed. Serve the files over HTTP so JavaScript module imports work.
 
 ## Controls
-- Act 1: click/tap tasks and conversation replies.
-- Act 2: arrows/WASD; Space or Wait advances a turn without moving.
-- Act 3: left/right or A/D; Space/Up/W or Jump clears low papers.
-- P or Pause freezes the chase; Calm mode slows it. Restart retries the current act. Tabs allow jury access to each act.
 
-## Validate
+| Context | Controls |
+| --- | --- |
+| Cubicle and conversations | Click or tap the available actions |
+| HR patrol | Arrow keys / WASD to move; Space to wait |
+| Boss chase | Left / Right or A / D to switch lanes; Space / Up / W to jump |
+| Chase settings | P or Pause to pause; Calm mode for a slower pace |
+| Replay | Restart the current act or select an act from the navigation |
+
+## Architecture
+
+Plain HTML, CSS and JavaScript modules, with no application build step or runtime API dependency.
+
+- `dist/engine.js` — deterministic rules, challenge data and state transitions.
+- `dist/app.js` — input handling, scene rendering, animation and audio.
+- `dist/index.html`, `dist/style.css` — document structure and responsive interface.
+- `tests/engine.test.js` — transition tests and HR route search.
+
+See the [architecture notes](docs/architecture.md) and [gameplay specification](docs/gameplay.md) for implementation details. Despite its name, `dist/` is tracked application source in this buildless project.
+
+## Verification
+
+Requires Node.js 18 or later. No dependency installation is needed.
+
 ```sh
 npm test
+node --check dist/app.js
 ```
-Node 18+ is recommended. No npm install needed. Tests cover report ordering, dialogue choices, HR solution discovery, collision rules, deterministic replay, chase victory, jump restrictions, three-hit defeat and reset state.
 
-## Submission evidence
-- [AI_LOG.md](AI_LOG.md): selected real prompts, AI tools and actual corrections.
-- [PROMPT_LOG.md](PROMPT_LOG.md): chronological prompt record and outcomes.
-- [PITCH.md](PITCH.md): 60-second pitch including AI workflow.
-- [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md): orientation rubric and readiness.
-- [RULES.md](RULES.md): exact implemented rules and known HR solution.
-- [CHANGELOG.md](CHANGELOG.md): genuine release checkpoints.
-- [TEST_REPORT.md](TEST_REPORT.md): checks actually performed and limitations.
+Six engine tests cover task ordering, dialogue choices, patrol solvability, collision rules, deterministic replay, chase victory, jump behaviour, defeat and resets. Desktop browser checks completed the first two acts and exercised chase controls, pause and retry. Remaining verification is listed in the [validation report](docs/validation.md).
 
-## Hosting
-Serve dist/ on any static host. Sites deployment is private to the owner unless its access is changed. For a jury link, use public GitHub Pages or another public static deployment. A public source repository is required by the orientation; a live link is optional. See DEPLOYMENT.md for the actual deployment status.
+## Project documentation
 
-## Versions
-v0.0.1 is the original design-only handoff; v0.2.0 is the three-act implementation checkpoint; v1.0.0 is reserved for the tested submission. GitHub's initial README commit is preserved when integrating the build. The orientation PDF is reference material and is not redistributed in this repository.
+- [AI development log](AI_LOG.md) — prompt briefs, tool usage, decisions and corrections.
+- [Release history](CHANGELOG.md) — implementation milestones.
+- [Pitch](docs/pitch.md) — a 60-second presentation and demo sequence.
+- [Development record](docs/development-record.md) — original requests and implementation outcomes.
 
-## Current delivery
-**Play (owner-private):** https://distraction-office-escape-xeo.xeo-077.chatgpt.site
+## Deployment
 
-**Public submission repository:** https://github.com/xeo-077/pixathon--team-index-0-
-
-**Continue elsewhere:** open [ANTIGRAVITY_HANDOFF.md](ANTIGRAVITY_HANDOFF.md). The backup ZIP includes source and a Git bundle with the local version tags. The private live link is for the owner; use local demo or separately configured public hosting for judges.
+Deploy the contents of `dist/` to any static host. All application assets use relative paths. The existing [hosted preview](https://distraction-office-escape-xeo.xeo-077.chatgpt.site) requires the owner’s account; use the local server for a jury demo. Google Fonts is optional and falls back to system fonts.

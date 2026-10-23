@@ -3,7 +3,7 @@
 
 **Project:** a three-act browser game about escaping the office after working hours.  
 **Workflow:** human-directed product decisions, AI-assisted implementation, deterministic testing, browser validation and versioned delivery.  
-**Source of truth:** [PROMPT_LOG.md](PROMPT_LOG.md) preserves the original user requests. The seven briefs below are **retrospective reconstructions** that express those requests and their implementation constraints in a reusable engineering format; they are not verbatim historical prompts.
+**Source of truth:** [development record](docs/development-record.md) preserves the original user requests. The seven briefs below are **retrospective reconstructions** that express those requests and their implementation constraints in a reusable engineering format; they are not verbatim historical prompts.
 
 ## 1. Decision ownership and toolchain
 
@@ -17,12 +17,12 @@ The team selected the office-escape concept and defined the final level progress
 | Git and GitHub connector | Source checkpoints, repository publication and history preservation |
 | Sites | Private browser-game deployment |
 
-No external image or music generation service was used. Antigravity was prepared as a continuation option, not used to produce this build. Exact original model identifiers and prompt timestamps were not recorded.
+Visuals were drawn in Canvas and audio synthesized with Web Audio. Original model identifiers and precise prompt timestamps were not recorded.
 
 ## 2. Structured prompt briefs
 
 ### 01 — Evaluate the design space
-**Original intent:** PROMPT_LOG P001–P002.
+**Original intent:** Development record P001–P002.
 
 > Act as a game-design lead evaluating the four supplied Pixathon briefs. Compare creative latitude, first-30-second comprehension, mechanical depth, implementation risk and expansion potential. For Open Innovation, propose three mechanically distinct concepts with humour arising from player decisions rather than decorative dialogue.
 >
@@ -60,7 +60,7 @@ No external image or music generation service was used. Antigravity was prepared
 >
 > Every wrong action must produce useful feedback. Avoid hidden random outcomes. Preserve deliberate differences between acts: contextual reasoning, route planning and reaction under pressure. Treat the runner as an arcade payoff; do not overstate its novelty.
 
-**Recorded outcome:** contextual reply feedback, visible patrol sight tiles, deterministic detection, clear-lane cues and distinct obstacle rules. Exact mechanics are documented in [RULES.md](RULES.md).
+**Recorded outcome:** contextual reply feedback, visible patrol sight tiles, deterministic detection, clear-lane cues and distinct obstacle rules. Exact mechanics are documented in [gameplay specification](docs/gameplay.md).
 
 ### 05 — Verify transitions and challenge solvability
 **Original intent:** implementation verification supporting P004 and P009.
@@ -78,7 +78,7 @@ No external image or music generation service was used. Antigravity was prepared
 >
 > Keep the pitch approximately half game demonstration and half AI workflow. Preserve the team’s three-act scope. Distinguish the required public repository from optional live hosting, and identify the audience of any deployed link. Do not fabricate team names, human playtests or submission-form completion.
 
-**Recorded outcome:** public GitHub source, a private playable Site, pitch, checklist, rules, test report and versioned documentation. The official submission form remains a team action.
+**Recorded outcome:** public GitHub source, a private playable Site, pitch, gameplay specification, validation report and versioned documentation. The official submission form remains a team action.
 
 ### 07 — Preserve continuation without losing context
 **Original intent:** P010.
@@ -87,7 +87,7 @@ No external image or music generation service was used. Antigravity was prepared
 >
 > Supply a copy-paste continuation instruction that starts by inspecting the existing project. Preserve history and append future prompts. Never replace the project with a fresh scaffold, force-push over teammate work or embed credentials.
 
-**Recorded outcome:** [ANTIGRAVITY_HANDOFF.md](ANTIGRAVITY_HANDOFF.md), local launch shortcut and a downloadable source/history backup.
+**Recorded outcome:** a continuation brief, local launch shortcut and source/history backup were prepared. Recovery packages are maintained separately from the submission source tree.
 
 ## 3. Observed errors and corrective action
 
@@ -106,4 +106,4 @@ These are observed issues, not reconstructed failure anecdotes. The revised prom
 - **Unverified:** a complete winning browser chase, physical-phone playtesting, stranger playtesting and audio-quality review.
 - **Delivery:** public repository and owner-private Site were published. The private Site is not a public jury link.
 
-Detailed evidence and remaining checks: [TEST_REPORT.md](TEST_REPORT.md). Release checkpoints: [CHANGELOG.md](CHANGELOG.md). The chronological prompt record remains [PROMPT_LOG.md](PROMPT_LOG.md).
+Detailed evidence and remaining checks: [validation report](docs/validation.md). Release checkpoints: [CHANGELOG.md](CHANGELOG.md). The chronological prompt record remains [development record](docs/development-record.md).

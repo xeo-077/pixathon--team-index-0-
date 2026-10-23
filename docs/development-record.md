@@ -1,7 +1,7 @@
-# Prompt log
+# Development record
 
 Date: 2026-10-23 (Asia/Kolkata). Exact times unavailable.
-Source: visible ChatGPT conversation. Model identifier unavailable. This is not a complete account-wide transcript. Earlier project conversations have not been imported.
+Source: visible ChatGPT conversation. Model identifier unavailable. This record covers this project conversation. References to earlier file locations describe the repository at that checkpoint.
 
 ## P001 — Brief comparison
 
@@ -25,17 +25,6 @@ Exact user prompt:
 
 Assistant outcome (summary): prepared CODEX_HANDOFF.md, AGENTS.md, README.md, PROMPT_LOG.md, CHANGELOG.md, VERSION and .gitignore. Initialized a local Git repository and design checkpoint v0.0.1, exported history as a Git bundle, and packaged the handoff. The package is a development brief, not a playable game. No GitHub remote was supplied and no push was performed. No transfer to a separate Codex session was performed.
 Validation: documentation files and bundle checked during packaging; no gameplay tests apply yet.
-
-## Future entry template
-
-- Prompt ID and actual date/time if available:
-- Tool/model if known:
-- Exact user or submitted AI prompt (redact secrets explicitly):
-- Result summary:
-- Files changed:
-- Validation actually run and results:
-- Limitations:
-- Related commit: record after creation in the next log update; never invent a hash.
 
 ## P004 — Build here; revised three-level design
 Date: 2026-10-23 (Asia/Kolkata), exact time not recorded.
@@ -95,3 +84,12 @@ Exact user prompt:
 Result summary: rewrote AI_LOG.md as a structured engineering record with seven retrospective prompt briefs covering discovery, scope, architecture, puzzle design, validation, submission evidence and continuity. Each brief states constraints, deliverables and acceptance criteria. These are explicitly retrospective reconstructions, not claims that the wording was submitted during the original build. Original user prompts remain here. Preserved actual tool attribution, genuine corrections and test limitations.
 Files changed: AI_LOG.md, PROMPT_LOG.md, CHANGELOG.md.
 Validation: documentation structure, seven numbered briefs, source links and claims checked against the prior log and TEST_REPORT.md. No game code changed; gameplay tests not rerun for this prose-only edit.
+
+## P012 — Repository presentation and organization
+Exact user prompt:
+> just change the github repo , dont make it look like a fy student,s repo , make it look like a professional swe was doing the work , dont keep anything unnecessary in it which the jury would not like
+
+Scope: GitHub repository presentation and documentation cleanup. Preserve source behaviour, development history, required AI evidence and accurate validation. Remove redundant handoff, deployment metadata and setup scaffolding from the current GitHub tree; existing downloadable backups remain available. Organize engineering documentation under docs/.
+
+Result: reorganized documentation, removed redundant scaffolding and retained seven structured AI briefs. Validation and publication results are recorded in the cleanup commit. No gameplay changes.
+Validation outcome: all local Markdown links resolved; seven structured prompt briefs retained; game and test files match the pre-cleanup commit byte-for-byte; six existing engine tests passed. The repository cleanup is published as a new commit without rewriting earlier history.
