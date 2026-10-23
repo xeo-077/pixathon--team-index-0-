@@ -36,3 +36,43 @@ Validation: documentation files and bundle checked during packaging; no gameplay
 - Validation actually run and results:
 - Limitations:
 - Related commit: record after creation in the next log update; never invent a hash.
+
+## P004 — Build here; revised three-level design
+Date: 2026-10-23 (Asia/Kolkata), exact time not recorded.
+Exact user prompt (HTML space entity normalized to a space):
+> leave codex do everything here cuz i dont understand shit , our There will be three levels: 
+>
+> 1. The first level will start at the cubicle, where the first obstacle will be on office skill, then some employees talking to him, and it will then be an interactive level where we give the conversation.
+> 2. The second level will be a hr in the moving activity, moving in a fixed pattern.
+> 3. the third and final level will be the boss , where a file falls alerting the boss , and a chase scene like temple run or subway surfers
+
+Implementation interpretation: office skill becomes a report submission sequence; conversations are contextual multiple-choice puzzles; HR moves one deterministic step per player action; boss chase uses three lanes, dodge and jump. User's new design supersedes original ghost/three-distraction design. Private Sites hosting is used for a playable link; GitHub remote remains unspecified.
+
+## P005 — GitHub destination
+Exact user prompt:
+> [https://github.com/xeo-077/pixathon--team-index-0-](https://github.com/xeo-077/pixathon--team-index-0-)
+> this is the github repo
+Result: retained user-selected repository; awaiting GitHub connection before inspecting/pushing. No remote write claimed.
+
+## P006 — Orientation compliance
+Exact user prompt:
+> update everything needed as per the ppt , of 22 pages
+Result in progress: read all 22 rendered pages of Pixathon Orientation + Build with AI_v1.pdf. Required evidence: AI_LOG.md, 5–10 key prompts, tools actually used, one real AI error/correction, commit history, public repository and 60-second pitch including AI workflow. Slide 18's 5+ levels is suggested schedule guidance; user explicitly wants three levels and chosen brief requires at least three.
+
+## P007 — Connection confirmation
+Exact user prompt:
+> ive installed the plugin
+Result: GitHub installed state confirmed; repository metadata confirms public visibility and push permission.
+
+## P008 — Browser platform reminder
+Exact user prompt:
+> start working on the game , it should be a browser based game
+Result: continued the in-progress HTML/CSS/JavaScript browser game; no separate Codex session or install needed for players.
+
+## P009 — Preserve level structure
+Exact user prompt:
+> start working on the game , it should be a browser based game with the level structure as discussed
+Result: retained cubicle task + two conversations; deterministic HR patrol; falling-file intro + three-lane boss chase. Browser testing confirmed first-act wrong-order and wrong-answer feedback, first-act completion, and 14-turn HR completion. Six engine tests pass, including chase win/loss and jump rules. Boss browser tests and final packaging continue.
+
+### Actual correction during implementation
+The AI-created initial .gitignore excluded dist/, which now contains the buildless game source. This would have omitted the playable game from a normal Git add. Removed that exclusion before committing, rather than claiming source was uploaded. Also moved the HR grid up 12 canvas pixels after noticing its last row touched the lower edge.
