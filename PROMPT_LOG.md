@@ -87,3 +87,11 @@ All three acts implemented. Six engine tests pass. Browser completed acts 1 and 
 
 ### Publication outcome
 GitHub connector published the source and evidence to the user-selected public repository; remote VERSION verified as 1.0.0. Private Sites deployment succeeded for game source 44d68444d660f03f39cd6077a392a3cc507a51f8. URL: https://distraction-office-escape-xeo.xeo-077.chatgpt.site. A private link is not a public jury link. Documentation-only completion follows publication; game assets unchanged. No official submission form was sent.
+
+## P011 — Professional AI workflow documentation
+Exact user prompt:
+> i dont like the ai log . md change it to something that a senior prompt engineer would prompt like , not amateurs
+
+Result summary: rewrote AI_LOG.md as a structured engineering record with seven retrospective prompt briefs covering discovery, scope, architecture, puzzle design, validation, submission evidence and continuity. Each brief states constraints, deliverables and acceptance criteria. These are explicitly retrospective reconstructions, not claims that the wording was submitted during the original build. Original user prompts remain here. Preserved actual tool attribution, genuine corrections and test limitations.
+Files changed: AI_LOG.md, PROMPT_LOG.md, CHANGELOG.md.
+Validation: documentation structure, seven numbered briefs, source links and claims checked against the prior log and TEST_REPORT.md. No game code changed; gameplay tests not rerun for this prose-only edit.
