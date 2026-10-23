@@ -84,3 +84,6 @@ Result: prepare ANTIGRAVITY_HANDOFF.md with a copy-paste continuation prompt, ac
 
 ### P004–P010 completion evidence
 All three acts implemented. Six engine tests pass. Browser completed acts 1 and 2 and tested runner controls, pause, calm mode, defeat and retry. Full chase victory is engine-tested, not browser-certified. Added final test report, animated file incident and Antigravity fallback. Direct GitHub CLI push lacked credentials; used the authorized GitHub connector to import actual local milestone snapshots as commits on top of the original main. Local full history remains preserved, including v0.0.1 and v0.2.0 tags; do not confuse connector import commit hashes with local source hashes.
+
+### Publication outcome
+GitHub connector published the source and evidence to the user-selected public repository; remote VERSION verified as 1.0.0. Private Sites deployment succeeded for game source 44d68444d660f03f39cd6077a392a3cc507a51f8. URL: https://distraction-office-escape-xeo.xeo-077.chatgpt.site. A private link is not a public jury link. Documentation-only completion follows publication; game assets unchanged. No official submission form was sent.

@@ -26,3 +26,6 @@
 - Browser-verified both puzzle acts, runner controls, pause, calm mode, defeat and retry.
 - Full runner victory verified in engine tests; full browser victory and physical-phone testing remain explicitly unverified.
 - Preserved the original GitHub README commit; connector imports record real checkpoint uploads without rewriting main.
+
+### Delivery record
+Public GitHub source and private Sites deployment verified. README and DEPLOYMENT.md identify the private audience and local jury-demo fallback. Antigravity backup includes source plus local tagged Git history.

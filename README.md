@@ -45,3 +45,10 @@ Serve dist/ on any static host. Sites deployment is private to the owner unless 
 
 ## Versions
 v0.0.1 is the original design-only handoff; v0.2.0 is the three-act implementation checkpoint; v1.0.0 is reserved for the tested submission. GitHub's initial README commit is preserved when integrating the build. The orientation PDF is reference material and is not redistributed in this repository.
+
+## Current delivery
+**Play (owner-private):** https://distraction-office-escape-xeo.xeo-077.chatgpt.site
+
+**Public submission repository:** https://github.com/xeo-077/pixathon--team-index-0-
+
+**Continue elsewhere:** open [ANTIGRAVITY_HANDOFF.md](ANTIGRAVITY_HANDOFF.md). The backup ZIP includes source and a Git bundle with the local version tags. The private live link is for the owner; use local demo or separately configured public hosting for judges.

@@ -1,11 +1,15 @@
-# Deployment status
+# Deployment status — verified 2026-10-23
 
-GitHub target: https://github.com/xeo-077/pixathon--team-index-0-
-Public visibility and push permission confirmed through the connected GitHub account.
+## GitHub
+Public source: https://github.com/xeo-077/pixathon--team-index-0-
+VERSION reads 1.0.0 in the connected repository. Original repository history is preserved. Connector upload commits import the design checkpoint, game checkpoint and final submission. Local version tags are included in the backup Git bundle; GitHub tag creation is not claimed.
 
-Sites project registered: appgprj_6adb3dbc9284819184536e054c839b1b
-Audience: owner-private. Hosting is being finalized; registration alone is not a deployed link.
+## Playable private Site
+https://distraction-office-escape-xeo.xeo-077.chatgpt.site
+Deployment status: succeeded.
+Audience: owner-private (requires the owner's access); do not present this as a public jury link.
+Published game source: 44d68444d660f03f39cd6077a392a3cc507a51f8.
+Documentation-only completion records may follow that commit; game assets remain unchanged.
 
-Game files are the dist/ directory. To run locally, double-click START_GAME.bat on Windows with Python installed, or use the README server command.
-
-For public jury hosting, GitHub Pages can serve the static files. Do not assume it is enabled until a deployment succeeds. The orientation requires the public repo link and makes the live link optional.
+## Jury delivery
+The orientation requires the public GitHub repo link; live hosting is optional. For a laptop demo use START_GAME.bat with Python installed, or the README local-server command. GitHub Pages has not been enabled or verified. A public live link remains an optional follow-up, not a completed claim.
