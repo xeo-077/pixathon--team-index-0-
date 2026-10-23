@@ -29,3 +29,8 @@
 
 ### Delivery record
 Public GitHub source and private Sites deployment verified. README and DEPLOYMENT.md identify the private audience and local jury-demo fallback. Antigravity backup includes source plus local tagged Git history.
+
+## Documentation revision — 2026-10-23
+- Reorganized AI_LOG.md into seven structured retrospective prompt briefs with objectives, constraints, acceptance criteria and recorded outcomes.
+- Preserved actual requests in PROMPT_LOG.md and retained verification limits and observed corrections.
+- Documentation-only change; game version remains 1.0.0.
