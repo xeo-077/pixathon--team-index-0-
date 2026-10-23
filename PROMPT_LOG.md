@@ -76,3 +76,11 @@ Result: retained cubicle task + two conversations; deterministic HR patrol; fall
 
 ### Actual correction during implementation
 The AI-created initial .gitignore excluded dist/, which now contains the buildless game source. This would have omitted the playable game from a normal Git add. Removed that exclusion before committing, rather than claiming source was uploaded. Also moved the HR grid up 12 canvas pixels after noticing its last row touched the lower edge.
+
+## P010 — Antigravity fallback
+Exact user prompt:
+> in case the limit exhausts create something to shift to antigravity
+Result: prepare ANTIGRAVITY_HANDOFF.md with a copy-paste continuation prompt, actual current state, repository/run instructions and remaining verification. Include it in source and a downloadable source/history backup. This is a backup request; continue building here.
+
+### P004–P010 completion evidence
+All three acts implemented. Six engine tests pass. Browser completed acts 1 and 2 and tested runner controls, pause, calm mode, defeat and retry. Full chase victory is engine-tested, not browser-certified. Added final test report, animated file incident and Antigravity fallback. Direct GitHub CLI push lacked credentials; used the authorized GitHub connector to import actual local milestone snapshots as commits on top of the original main. Local full history remains preserved, including v0.0.1 and v0.2.0 tags; do not confuse connector import commit hashes with local source hashes.
