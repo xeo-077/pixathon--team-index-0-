@@ -134,7 +134,7 @@ test("all levels unlock sequentially with actual requirements", () => {
   assert.equal(advance(s), false);
   const h = newStealth();
   distract(s, h, "noisePrinter");
-  interact(s, "pass");
+  interact(s, "pass", undefined, h);
   interact(s, "locker");
   interact(s, "terminal", "B");
   distract(s, h, "phone");

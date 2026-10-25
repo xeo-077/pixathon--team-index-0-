@@ -15,7 +15,7 @@ import {
   chaseAction,
   tickChase,
   pressGate,
-  wave,
+  score,
 } from "./engine.js";
 import { MAPS, names } from "./world.js";
 import { interact, clues } from "./story.js";
@@ -52,6 +52,7 @@ let stealth = newStealth(),
   chase = newChase(),
   keys = new Set(),
   selected = 0;
+let escapeAction = null;
 const local = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname),
   params = new URLSearchParams(location.search),
   testing = local && params.get("test") === "1",
@@ -79,6 +80,7 @@ function close() {
   canvas.focus();
 }
 function show(title, text, choices, kind = "menu", speaker = "YOU") {
+  escapeAction = null;
   keys.clear();
   panel = kind;
   overlay.replaceChildren();
@@ -125,6 +127,7 @@ function show(title, text, choices, kind = "menu", speaker = "YOU") {
   for (const item of choices) {
     const b = document.createElement("button");
     b.textContent = item.label;
+    b.setAttribute("aria-label", item.label);
     b.onclick = () => {
       sound.unlock();
       sound.effect("click", state.settings);
@@ -241,7 +244,7 @@ function doInteract(answer) {
     toast(hide(state, stealth));
     return;
   }
-  const response = interact(state, o.id, answer);
+  const response = interact(state, o.id, answer, stealth);
   activeObject = o;
   if (response.disable) stealth.disable = 45;
   if (response.release) stealth.release = 60;
@@ -283,13 +286,16 @@ function doInteract(answer) {
   activeObject = o;
 }
 function chaseIntro() {
+  mode = "incident";
+  time = 0;
   show(
     "THE FINAL FOLLOW-UP",
-    "A file slips. Paper scatters across the stairwell.\n\nTHUD.\n\nThe office goes quiet. A silhouette turns.\nBOSS: “Leaving already?”\nBOSS: “I’ve got one last thing for you.”",
+    "THUD. The office goes quiet. A silhouette turns.\nBOSS: “Leaving already? I’ve got one last thing for you.”",
     [
       {
         label: "Run! (Skip / continue)",
         run: () => {
+          mode = "play";
           close();
           show(
             "RUN. THE BOSS IS COMING.",
@@ -346,7 +352,7 @@ function ending() {
       state.stats.seconds
         .map((_, i) => `Act ${i + 1}: ${Math.round(state.stats.seconds[i])}s`)
         .join(" · ") +
-      `\n${state.stats.retries} retries · ${state.stats.detections} detections · ${state.stats.collisions} collisions`,
+      `\n${state.stats.retries} retries · ${state.stats.detections} detections · ${state.stats.collisions} collisions\nEscape score: ${score(state)} · ${state.settings.pace.toUpperCase()}`,
     [
       { label: "The evening is ours. / Credits", run: () => credits(title) },
       { label: "Return to title", run: title },
@@ -458,6 +464,7 @@ function settings(next = () => close()) {
     "settings",
   );
   box.classList.add("settings");
+  escapeAction = next;
   for (const [key, label] of [
     ["music", "Music volume"],
     ["sound", "Sound volume"],
@@ -542,6 +549,7 @@ function settings(next = () => close()) {
   ]) {
     const b = document.createElement("button");
     b.textContent = a.label;
+    b.setAttribute("aria-label", a.label);
     b.onclick = a.run;
     actions.append(b);
   }
@@ -606,6 +614,15 @@ function press(k) {
   if (panel) {
     if (k === "escape") {
       if (panel === "title" || panel === "failure") return;
+      if (escapeAction) {
+        escapeAction();
+        return;
+      }
+      if (mode === "incident") {
+        mode = "play";
+        close();
+        return;
+      }
       if (mode === "play") close();
       else title();
       return;
@@ -654,6 +671,17 @@ function press(k) {
 }
 document.addEventListener("keydown", (e) => {
   const k = e.key.toLowerCase();
+  if (panel && k === "tab") {
+    const controls = [...overlay.querySelectorAll("button,input")];
+    const index = controls.indexOf(document.activeElement);
+    if (controls.length) {
+      e.preventDefault();
+      controls[
+        (index + (e.shiftKey ? -1 : 1) + controls.length) % controls.length
+      ].focus();
+    }
+    return;
+  }
   if (e.target.tagName === "INPUT") return;
   if (
     [
@@ -748,6 +776,7 @@ function tick(dt) {
   draw();
 }
 function draw() {
+  $("#screen").classList.toggle("runner", state.level === 3 && mode === "play");
   const near = state.level < 3 ? nearby(state) : null;
   render(ctx, state, {
     mode,
@@ -768,7 +797,8 @@ function draw() {
     $("#danger").textContent = hud;
     lastHud = hud;
   }
-  $("#act").textContent = `0${state.level} / ${names[state.level - 1]}`;
+  const actLabel = `0${state.level} / ${names[state.level - 1]}`;
+  if ($("#act").textContent !== actLabel) $("#act").textContent = actLabel;
   const prompt =
     mode === "play" && !panel
       ? state.level === 3

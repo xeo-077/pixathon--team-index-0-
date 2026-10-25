@@ -107,3 +107,19 @@ These are observed issues, not reconstructed failure anecdotes. The revised prom
 - **Delivery:** public repository and owner-private Site were published. The private Site is not a public jury link.
 
 Detailed evidence and remaining checks: [validation report](docs/validation.md). Release checkpoints: [CHANGELOG.md](CHANGELOG.md). The chronological prompt record remains [development record](docs/development-record.md).
+
+## 5. Corporate Sapphire rebuild — 26 October 2026
+
+The earlier sections describe the original 1.0 build. This section records the new implementation and does not rewrite that history.
+
+**Actual request:** the user supplied a long project directive titled “Transform You're the Distraction into a complete pixel-art office escape game,” retaining the three acts and requiring exploration, consequential dialogue, reactive stealth, a substantially deeper chase, gated progression, persistence, tests and browser verification. This is a summary of that request, not a reconstructed verbatim prompt.
+
+**Work performed:** audited the existing repository; kept the static Canvas/ES-module architecture; implemented original Corporate Sapphire pixel art, tile collision, office deduction and dialogue, three HR patrols with occluded vision/investigation, two distractions, expiring hiding, cameras, a route-access puzzle, 60 timed chase rows, phase checkpoints, a final release switch, save validation, responsive controls, settings, original synthesized audio and a connected ending. Existing AI records and Git ancestry were preserved.
+
+**Tools actually used:** Codex source editing, PowerShell, Git, Node test runner, Prettier, Playwright with installed Microsoft Edge, the app browser for visual inspection, and web lookup for the supplied aesthetic/accessibility references. No Phaser migration, downloaded game assets, paid runtime API or fabricated human playtest.
+
+**Observed corrections:** accessible button names initially included decorative arrows; explicit labels fixed reliable keyboard/browser selection. Level-3 restart initially removed prerequisite flags; preserving earlier-act flags fixed save restoration. Browser evidence showed stealth could be cleared too directly; stronger detection and an active printer-access window made that route fail, while an alternate approach was verified. Notifications were moved off chase lanes. The downloaded Chromium runtime failed on this machine, so the test suite explicitly uses an installed Edge option.
+
+**Evidence:** 18 rule tests and 3 browser scenarios pass. The browser completes normal progression from title to final victory, including a deliberate chase defeat/retry. Another scenario checks HR defeat/retry; another checks mobile emulation, touch, menus, settings and reset. Screenshots were inspected. Full details and the distinction between simulated time and human play time are in docs/validation.md.
+
+**Limitations:** unfamiliar-player difficulty, physical-phone input, audio listening quality, cross-browser compatibility and hardware frame-rate benchmarks remain unverified. No claimed first-play duration is inferred from the deterministic route.

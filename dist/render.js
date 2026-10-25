@@ -92,6 +92,7 @@ function object(o, time) {
     y = o.y * TILE;
   if (o.type === "npc") {
     person(c, x + 8, y + 12, o.color, time, false, 1.57, o.id);
+    text(o.name.toUpperCase(), x + 8, y - 15, 6, palette.navy, "center");
     return;
   }
   rect(x + 2, y + 11, 17, 7, "#172b4930");
@@ -224,6 +225,17 @@ function cone(map, g, range, angle, color) {
   }
   c.closePath();
   c.fill();
+  c.save();
+  c.clip();
+  c.strokeStyle = "#fff1cb38";
+  c.lineWidth = 1;
+  for (let i = -140; i < 140; i += 10) {
+    c.beginPath();
+    c.moveTo(g.x * 16 + i, g.y * 16 - 140);
+    c.lineTo(g.x * 16 + i + 140, g.y * 16 + 140);
+    c.stroke();
+  }
+  c.restore();
 }
 function world(s, v) {
   const map = MAPS[s.level] || MAPS[1],
@@ -258,14 +270,32 @@ function world(s, v) {
     rect(416, 240, 192, 160, "#b3a695");
     rect(208, 32, 112, 32, "#78969c");
     text("OPERATIONS", 218, 52, 9);
-    text("SUPPLY / MAYA", 37, 247, 8);
+    text("SUPPLY / MAYA", 37, 234, 8);
     text("MEETING 04", 435, 251, 8);
     text("17:01", 559, 42, 9, palette.navy);
+    // Woven runners and work-zone edges keep the floor readable without extra collision.
+    for (const [x, y, w, h] of [
+      [224, 112, 72, 132],
+      [32, 348, 152, 28],
+      [432, 344, 160, 40],
+    ]) {
+      rect(x, y, w, h, "#668b9980");
+      rect(x + 2, y + 2, w - 4, 1, "#c4d1ba");
+      rect(x + 2, y + h - 3, w - 4, 1, "#c4d1ba");
+    }
+    for (const [x, y] of [
+      [315, 48],
+      [575, 206],
+    ]) {
+      rect(x - 8, y - 7, 17, 14, "#365991");
+      rect(x - 6, y - 5, 13, 10, "#d8dcc7");
+      text("501", x, y + 2, 6, palette.navy, "center");
+    }
   } else {
     text("ARRIVALS", 29, 397, 8);
     text("RECORDS", 242, 397, 8);
     text("PEOPLE & CULTURE", 438, 38, 9);
-    for (const g of v.stealth.guards) cone(map, g, 6.2, 0.67, "#ffca6040");
+    for (const g of v.stealth.guards) cone(map, g, 7, 0.75, "#ffca6040");
     if (!v.stealth.disable)
       for (const cam of cameras)
         cone(
@@ -277,7 +307,11 @@ function world(s, v) {
         );
   }
   const occupied = new Set(
-    [...map.objects, ...map.decor].map((o) => `${o.x},${o.y}`),
+    [...map.objects, ...map.decor].flatMap((o) =>
+      ["desk", "table"].includes(o.type)
+        ? [`${o.x},${o.y}`, `${o.x + 1},${o.y}`]
+        : [`${o.x},${o.y}`],
+    ),
   );
   for (const key of map.solid) {
     if (occupied.has(key)) continue;
@@ -296,6 +330,23 @@ function world(s, v) {
     y: o.y + 0.7,
     draw: () => object(o, v.time),
   }));
+  if (s.level === 1) {
+    const by = 12 + Math.sin(v.time * 0.45) * 2;
+    drawables.push({
+      y: by,
+      draw: () =>
+        person(
+          c,
+          13.5 * 16,
+          by * 16,
+          "#8b9eb4",
+          v.time,
+          true,
+          Math.cos(v.time * 0.45) > 0 ? 1.57 : -1.57,
+          "worker",
+        ),
+    });
+  }
   drawables.push({
     y: p.y,
     draw: () => {
@@ -468,7 +519,7 @@ function runner(s, v) {
   person(
     c,
     240,
-    321 - r.pressure * 0.28,
+    295 - r.pressure * 0.2,
     "#b9778f",
     v.time,
     true,
@@ -499,7 +550,7 @@ function runner(s, v) {
       : phase === 1
         ? "“WE NEED TO CIRCLE BACK!”"
         : "“THIS IS A QUICK MEETING!”";
-  text(quote, 240, 307, 8, palette.cream, "center");
+  text(quote, 240, 291, 8, palette.cream, "center");
 }
 function skyline(time, ending = false) {
   rect(0, 0, 480, 320, ending ? "#9380ad" : "#243653");
@@ -577,6 +628,34 @@ export function render(ctx, s, v) {
   c = ctx;
   c.imageSmoothingEnabled = false;
   c.clearRect(0, 0, 480, 320);
+  if (v.mode === "incident") {
+    rect(0, 0, 480, 320, palette.navy);
+    rect(65, 25, 350, 220, "#7589a3");
+    for (let i = 0; i < 8; i++) {
+      rect(70, 30 + i * 20, 190, 17, "#9bafbb");
+      rect(70, 47 + i * 20, 190, 3, "#435c7c");
+    }
+    rect(318, 35, 60, 85, "#344c70");
+    rect(323, 40, 50, 77, "#a3bac6");
+    person(c, 204, 139, "#61cbb7", v.time, false, 0, "you", 2);
+    person(
+      c,
+      343,
+      122,
+      "#b9778f",
+      v.time,
+      false,
+      v.time < 1.4 ? -1.57 : 3.14,
+      "boss",
+      2,
+    );
+    const fall = s.settings.reduced ? 1 : Math.min(1, v.time / 1.2);
+    rect(233, 45 + fall * fall * 110, 17, 22, palette.cream);
+    rect(237, 49 + fall * fall * 110, 9, 2, "#8d80b8");
+    if (fall === 1) text("THUD!", 263, 162, 14, palette.gold);
+    text("A VERY QUIET STAIRWELL.", 240, 20, 9, palette.mint, "center");
+    return;
+  }
   if (v.mode === "title") {
     skyline(v.time);
     rect(32, 31, 416, 109, "#172b49ed");

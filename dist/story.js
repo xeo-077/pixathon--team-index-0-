@@ -1,7 +1,7 @@
 import { grant, take, clamp, canExit, objective } from "./engine.js";
 const choice = (id, label) => ({ id, label });
 const say = (speaker, text, choices = []) => ({ speaker, text, choices });
-export function interact(s, id, answer) {
+export function interact(s, id, answer, runtime) {
   const f = s.flags,
     done = (text) => say("YOU", text),
     wrong = (text) => {
@@ -294,9 +294,12 @@ export function interact(s, id, answer) {
           "Cone stripes mean visible space. Walls block sight. Detection builds, then falls out of sight. Alcoves hide you for five seconds, unless HR already saw you. Printer and phone pull nearby patrols away. A pass checkpoints Records.",
         );
       case "pass":
-        if (!f.noisePrinter)
+        if (
+          !f.pass &&
+          (!f.noisePrinter || runtime?.guards[0].state !== "investigating")
+        )
           return done(
-            "Credentials are under audit. Trigger the west printer so HR opens the visitor drawer.",
+            "Credentials are under audit. Trigger the west printer, then reach this drawer while HR investigates (13 seconds). The drawer relocks when the audit resumes.",
           );
         f.pass = true;
         grant(s, "Visitor pass");

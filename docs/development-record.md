@@ -93,3 +93,10 @@ Scope: GitHub repository presentation and documentation cleanup. Preserve source
 
 Result: reorganized documentation, removed redundant scaffolding and retained seven structured AI briefs. Validation and publication results are recorded in the cleanup commit. No gameplay changes.
 Validation outcome: all local Markdown links resolved; seven structured prompt briefs retained; game and test files match the pre-cleanup commit byte-for-byte; six existing engine tests passed. The repository cleanup is published as a new commit without rewriting earlier history.
+
+## P013 — Corporate Sapphire implementation directive
+Date: 26 October 2026 (Asia/Calcutta).
+
+The user provided a detailed implementation directive to rebuild the existing three-act game, with original GBA-era-inspired pixel artwork, exploration and office puzzles, reactive HR stealth, a deeper boss chase, progression validation, saves, accessibility basics and end-to-end testing. This entry summarizes the actual pasted request; it is not a verbatim transcript.
+
+Outcome: implemented the modular static game described in the current README and architecture notes. Preserved the original Git parent and earlier records. Actual logic/browser evidence, failure corrections and remaining limitations are in validation.md and the appended AI log. Local engineering commits use Codex <codex@localhost> to identify the assistant rather than impersonating a human contributor. No historical prompts, human playtest measurements or completion claims were invented.

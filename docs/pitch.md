@@ -1,22 +1,11 @@
-# 60-second pitch — You're the Distraction
+# Sixty-second demo
 
-Approximately 130 words; rehearse aloud and adjust pace. First half: game/demo. Second half: AI process. Do not claim uncompleted checks or human playtests.
+“It’s 5:01. Your shift is over. Your office disagrees.
 
-## 0–30 seconds — show the game
-“It’s 5:01. Your workday is over. Your office disagrees.
+You're the Distraction turns leaving work into a three-act pixel-art escape. Explore the office and cross-reference a signed report, negotiate real handoffs with colleagues, then outsmart HR's line of sight, cameras and investigation routines. A dropped file alerts the boss, and one last follow-up becomes a timed chase.
 
-You're the Distraction turns leaving work into a three-act escape. First, finish your report and talk your way out of two meetings. Then, read HR’s fixed patrol and cross the office unseen. Finally, a falling file alerts your boss, and ‘one last thing’ becomes a chase.
+Choices carry forward: helpful handoffs lower attention, reveal facilities information and can earn one emergency coffee. Success means your colleagues escape too—you were the distraction.
 
-The humour comes from recognisable office problems. The challenge changes from choosing words, to planning moves, to reacting under pressure.”
+We kept the browser game lightweight, created original procedural art and audio, and separated rules from presentation. Tests cover puzzle gates, occlusion, saves and a reachable 60-wave chase. Browser automation completes the actual three-act game through normal inputs. Our log records genuine defects and corrections; human difficulty testing remains the next step.”
 
-## 30–60 seconds — show your AI evidence
-“We used ChatGPT and Codex to explore concepts, then gave it our own three-level structure. It produced the browser game, dialogue and canvas art. We used automated tests, including a search that finds a valid HR escape route, and browser checks.
-
-We also caught an AI packaging mistake: it was ignoring the folder containing the game. Our AI log records that correction, our actual prompts, and our Git checkpoints.”
-
-## Demo actions
-- Start Act 1; show a wrong reply and the helpful feedback.
-- Use Act 2 tab; show the fixed orange sight area and Wait action.
-- Use Act 3 tab; start the chase, switch lanes, then Pause while speaking.
-- Keep AI_LOG.md and Git history ready for questions.
-- If live hosting fails, use the local Python server. Do not spend the pitch troubleshooting login.
+For a short demonstration, use localhost with `?demo=1`. Show an office interaction, HR's striped vision and a printer investigation, then jump/slide timing in the chase. Demo runs are temporary and cannot overwrite the normal save. The normal title screen has no act selector. Keep the actual AI log and validation report available; do not claim human playtests or unverified play duration.

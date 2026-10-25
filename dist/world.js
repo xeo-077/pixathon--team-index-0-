@@ -65,6 +65,14 @@ export function makeMap(level) {
       put(x + 1, y);
     }
     for (let x = 2; x < 12; x++) if (x !== 6 && x !== 7) put(x, 13);
+    for (const x of [4, 5, 8, 9, 23, 24, 27, 28]) put(x, 4);
+    for (const [x, y] of [
+      [3, 18],
+      [4, 18],
+      [10, 24],
+      [35, 25],
+    ])
+      decor.push(obj("", "", x, y, "cabinet"));
     for (let x = 25; x < 37; x++) if (x !== 30 && x !== 31) put(x, 14);
     for (let y = 15; y < 23; y++) put(25, y);
     for (const [x, y] of [

@@ -26,3 +26,12 @@
 ## 0.0.1 — 2026-10-23
 
 - Establish the initial concept, implementation brief and prompt record.
+
+## 2.0.0 — 2026-10-26 — Corporate Sapphire
+
+- Replace dashboard navigation with a pixel-art title, scrolling game world, dialogue, journal, inventory, pause and settings.
+- Add physical exploration, cross-referenced report evidence, a keypad and printer-routing puzzle, and three branching colleague handoffs.
+- Replace turn-based HR with three real-time patrols, wall-occluded vision, investigation, temporary hiding, cameras, distractions and timed access.
+- Replace the 15-wave safe-lane runner with 60 timed rows, jump/slide cooldowns, moving rows, pursuit recovery, checkpoints and a final release switch.
+- Add a falling-file scene, connected ending, original synthesized sound, versioned saves and responsive touch controls.
+- Add automated rules and full browser progression tests. Record human-balancing, physical-device and cross-browser limitations honestly.

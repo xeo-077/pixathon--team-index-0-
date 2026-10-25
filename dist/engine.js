@@ -1,6 +1,16 @@
 import { MAPS, WIDTH, HEIGHT, routes, cameras } from "./world.js";
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+export const score = (s) =>
+  Math.max(
+    0,
+    5000 -
+      s.stats.retries * 100 -
+      s.stats.detections * 100 -
+      s.stats.collisions * 25 -
+      s.stats.hints * 50 +
+      s.stats.nearMisses * 10,
+  );
 export const blocked = (map, x, y) =>
   x < 1 ||
   y < 1 ||
@@ -304,6 +314,10 @@ export function tickChase(c, s, dt) {
     c.status = "won";
     s.complete = true;
     s.achievements.push("PROFESSIONAL ESCAPE ARTIST");
+    if (s.stats.detections === 0) s.achievements.push("HR'S NIGHTMARE");
+    if (s.stats.collisions === 0) s.achievements.push("NOT TODAY, BOSS");
+    if (s.stats.hints === 0 && s.settings.pace === "standard")
+      s.achievements.push("OFFICE LEGEND");
     return "won";
   }
   if ([20, 40, 56].includes(c.wave)) {
@@ -416,7 +430,7 @@ export function tickStealth(s, h, dt) {
   const map = MAPS[2];
   let observed = false;
   for (const g of h.guards) {
-    const visible = !h.hidden && sees(map, g, s.player, 6.2, 0.67);
+    const visible = !h.hidden && sees(map, g, s.player, 7, 0.75);
     if (visible) {
       observed = true;
       h.source = "HR";
@@ -483,7 +497,7 @@ export function tickStealth(s, h, dt) {
       }
     }
   h.suspicion = clamp(
-    h.suspicion + (observed ? 34 + s.attention * 2 : -25) * dt,
+    h.suspicion + (observed ? 58 + s.attention * 3 : -25) * dt,
     0,
     100,
   );

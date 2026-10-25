@@ -5,6 +5,15 @@
   --mint: #a0d4c3;
   --gold: #ffd16d;
 }
+.runner #toast {
+  top: 35%;
+  left: 1%;
+  width: 17%;
+  max-width: 17%;
+  padding: 1%;
+  line-height: 1.4;
+  font-size: clamp(8px, 1.3vw, 12px);
+}
 * {
   box-sizing: border-box;
 }
