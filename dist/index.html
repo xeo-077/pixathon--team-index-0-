@@ -1,9 +1,54 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142c29"><meta name="description" content="It’s 5:01. Escape the office through conversation puzzles, an HR patrol and a boss chase."><title>You're the Distraction · Office Escape</title><link rel="stylesheet" href="style.css"></head><body>
-<header><a class="brand" href="./" aria-label="You're the Distraction home"><span class="brandmark">↗</span><span>YOU’RE THE<br><b>DISTRACTION.</b></span></a><span class="headernote">AN OFFICE ESCAPE GAME</span><div class="topright"><span class="live-dot"></span><span>OFF THE CLOCK. ALMOST.</span><button id="help" class="iconbutton" aria-label="How to play">?</button></div></header>
-<main><section class="heading"><div><div class="eyebrow">THE GREAT CLOCK-OUT</div><h1>Your shift is over.<br><span>Your office disagrees.</span></h1></div><div class="clock"><div>OFFICIAL OFFICE TIME</div><strong>17<span>:</span>01</strong><small>ONE MINUTE INTO YOUR FREEDOM</small></div></section>
-<nav class="acts" aria-label="Game levels"><button class="act active" data-level="1"><span class="actnum">01</span><span>THE CUBICLE<small>Finish. Deflect. Disappear.</small></span><span class="actstate">●</span></button><button class="act" data-level="2"><span class="actnum">02</span><span>HR HAS EYES<small>Every step is a negotiation.</small></span><span class="actstate">○</span></button><button class="act" data-level="3"><span class="actnum">03</span><span>THE FINAL FOLLOW-UP<small>This meeting could’ve been a sprint.</small></span><span class="actstate">○</span></button></nav>
-<section class="play-layout"><div class="game-panel"><div class="game-toolbar"><span><i class="live-dot"></i><b id="sceneLabel">FLOOR 04 / OPERATIONS</b></span><div><button id="pause" class="textbutton" disabled>Ⅱ Pause</button><button id="restart" class="textbutton">↻ Restart act</button></div></div><div class="scene"><canvas id="game" width="960" height="640" aria-label="Office game scene"></canvas><div id="sceneBadge" class="scene-badge">MONDAY, UNFORTUNATELY.</div><div id="fileIncident" class="file-incident" aria-hidden="true"><span>Q4<br>REPORT</span><b>THUD!</b></div><div id="overlay" class="overlay"></div></div><div class="game-footer"><span id="sceneHint">One employee. Three obstacles. Zero overtime.</span><span class="version">V1.0 · PIXATHON</span></div></div>
-<aside><div class="mission"><div class="eyebrow"><span class="tiny-square"></span> YOUR ESCAPE PLAN</div><h2 id="missionTitle">Leave on time.<br>A radical concept.</h2><p id="missionText">Clear your desk, dodge HR, and make it to the exit before your boss discovers “one last thing”.</p><div id="objective"></div></div><div id="interaction" class="interaction"></div><div class="office-note"><span>PINNED BY MANAGEMENT</span><p id="joke">“We’re a family.”<br><em>A family with attendance tracking.</em></p><div>— PEOPLE & CULTURE</div></div></aside></section>
-<footer><span>BUILT FOR THE ART OF LEAVING.</span><span>A puzzle. A patrol. A very personal performance review.</span><button id="motion" class="textbutton" aria-pressed="false">Calm mode: off</button></footer></main>
-<dialog id="helpDialog"><button id="closeHelp" class="close" aria-label="Close help">×</button><div class="eyebrow">EMPLOYEE SURVIVAL GUIDE</div><h2>How to clock out.</h2><p><b>01 · Cubicle</b><br>Follow the report checklist, then read each colleague’s clue and choose a useful reply.</p><p><b>02 · HR patrol</b><br>Use arrow keys, WASD or the buttons. HR moves once per step or wait. Orange tiles are watched. Walls block movement; invalid moves cost no turn.</p><p><b>03 · Boss chase</b><br>Left/right switches lanes. Space or Jump clears a low paper stack for that wave. Filing cabinets must be dodged. Three hits and you’re booked into a meeting.</p><p>Pause freezes the chase. Calm mode slows it down. You can replay any act from the tabs.</p><button id="helpDone" class="primary">Understood. Unfortunately.</button></dialog>
-<script type="module" src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#172b49" />
+    <meta
+      name="description"
+      content="A pixel-art office escape: solve a report conspiracy, outsmart HR and outrun one last follow-up."
+    />
+    <title>You're the Distraction</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="shell">
+      <section id="screen" aria-label="You're the Distraction game">
+        <canvas
+          id="game"
+          width="480"
+          height="320"
+          aria-label="Office exploration and chase. Controls and objectives are available in the pause menu."
+        ></canvas>
+        <div id="hud" hidden>
+          <span id="act"></span><span id="danger"></span
+          ><button id="pause" aria-label="Pause game">Ⅱ</button>
+        </div>
+        <div id="prompt" aria-live="polite"></div>
+        <div id="toast" role="status"></div>
+        <div id="overlay"></div>
+      </section>
+      <div id="touch" aria-label="Game controls">
+        <div class="pad">
+          <button data-hold="w" aria-label="Move up or jump">↑</button
+          ><button data-hold="a" aria-label="Move left">←</button
+          ><button data-hold="s" aria-label="Move down or slide">↓</button
+          ><button data-hold="d" aria-label="Move right">→</button>
+        </div>
+        <div class="actions">
+          <button data-press="e">E / ACT</button
+          ><button data-press=" ">JUMP</button
+          ><button data-press="s">SLIDE</button
+          ><button data-press="escape">MENU</button>
+        </div>
+      </div>
+      <p id="keyhelp">
+        WASD / arrows · E interact · I bag · J journal · Esc pause
+      </p>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
