@@ -1,41 +1,802 @@
-import{walls,patrol,sight,newPatrol,movePatrol,officeTask,conversations,answerConversation,newChase,resolveWave,wave,safeLanes}from'./engine.js';
-const $=s=>document.querySelector(s),canvas=$('#game'),ctx=canvas.getContext('2d');
-let level=1,started=false,step=0,chat=-1,hr=newPatrol(),chase=newChase(),running=false,paused=false,calm=matchMedia('(prefers-reduced-motion: reduce)').matches,elapsed=0,last=0,completed=new Set(),feedback='',chaseIntro=false;
-let sound=false,audio=null;const sb=document.createElement('button');sb.className='textbutton';sb.textContent='Sound: off';sb.onclick=()=>{sound=!sound;sb.textContent='Sound: '+(sound?'on':'off');beep(420)};document.querySelector('footer').append(sb);
-function beep(freq=440,duration=.08){if(!sound)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();audio.resume();const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(.06,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+duration)}catch{}}
-function overlay(kicker,title,text,label,fn,icon='↗'){const o=$('#overlay');o.innerHTML=`<div class="overlay-card"><div class="sticker">${icon}</div><div class="eyebrow">${kicker}</div><h2>${title}</h2><p>${text}</p><button class="primary" id="overlayAction">${label}<span>→</span></button></div>`;$('#overlayAction').onclick=fn;}
-function clearOverlay(){$('#overlay').innerHTML='';}
-function setMission(title,text,obj){$('#missionTitle').innerHTML=title;$('#missionText').textContent=text;$('#objective').innerHTML=obj?`<div class="objective">${obj}</div>`:'';}
-function updateTabs(){document.querySelectorAll('.act').forEach((b,i)=>{b.classList.toggle('active',level===i+1);b.setAttribute('aria-current',level===i+1?'step':'false');b.querySelector('.actstate').textContent=completed.has(i+1)?'✓':level===i+1?'●':'○';});}
-function startLevel(n){started=true;level=n;step=0;chat=-1;hr=newPatrol();chase=newChase();elapsed=0;running=false;paused=false;chaseIntro=false;feedback='';clearOverlay();$('#fileIncident').classList.remove('fall');updateTabs();$('#pause').disabled=true;$('#pause').textContent='Ⅱ Pause';$('#sceneBadge').textContent=['MONDAY, UNFORTUNATELY.','HR KNOWS YOUR LOCATION.','YOUR BOSS IS TYPING…'][n-1];$('#sceneLabel').textContent=['FLOOR 04 / OPERATIONS','FLOOR 04 / PEOPLE & CULTURE','EMERGENCY EXIT / ABSOLUTELY PERSONAL'][n-1];if(n===1)renderOffice();if(n===2)renderHR();if(n===3)introChase();draw();}
-function renderOffice(){setMission('First, look productive.','Send your report. Then escape two conversations without volunteering for overtime.',`<b>${step<3?'01 / REPORT CHECKLIST':'02 / CONVERSATION ESCAPE'}</b><br>${step<3?'Rename → Attach → Send':'Read the clue. Offer a useful alternative.'}`);$('#sceneHint').textContent='Goal: clear your report and both conversations.';if(step<3){$('#interaction').innerHTML=`<div class="label">DESKTOP / FINAL_FINAL_V7</div><h3>The report won’t send itself.</h3><p>Policy: name it <b>Weekly report</b>, attach the spreadsheet, then send. Yes, in that order.</p>${[['rename','01','Rename file'],['attach','02','Attach spreadsheet'],['send','03','Send report']].map(([a,n,t],i)=>`<button class="taskbtn ${i<step?'done':''}" data-task="${a}" ${i<step?'disabled':''}>${i<step?'✓':n} &nbsp; ${t}</button>`).join('')}<div class="feedback" role="status">${feedback||'Your cursor is hovering over freedom.'}</div>`;document.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{const r=officeTask(step,b.dataset.task);step=r.step;feedback=r.correct?'Done. Extremely professional.':'“Please follow the process.” Read the checklist above.';beep(r.correct?600:180);if(step===3){chat=0;feedback=''}renderOffice();draw()});}else if(chat<2){const c=conversations[chat];$('#interaction').innerHTML=`<div class="label">${c.name} / ${chat+1} OF 2</div><h3>${c.role}</h3><p>“${c.line}”</p><p class="clue">✦ <b>Useful intel:</b> ${c.clue}</p>${c.choices.map((t,i)=>`<button class="choice" data-choice="${i}">${String.fromCharCode(65+i)}. ${t}</button>`).join('')}<div class="feedback" role="status">${feedback||'Choose your words. Your evening depends on it.'}</div>`;document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{if(answerConversation(chat,+b.dataset.choice)){beep(750);feedback=c.success;chat++;if(chat===2){win(1);return}}else{feedback=c.failure;beep(180)}renderOffice();draw()})}}
-function renderHR(){setMission('Avoid a “quick chat”.','HR walks a fixed route. Move one tile, then HR moves one tile. Cross the corridor when the orange tiles are clear.',`<b>GOAL:</b> Reach the green exit in the top-right.<br><b>Orange:</b> watched · <b>Dots:</b> HR’s route`);$('#sceneHint').textContent=`Goal: reach EXIT unseen. Position ${hr.x+1}, ${hr.y+1} · ${hr.moves} turns`;$('#interaction').innerHTML=`<div class="label">TURN-BASED / TAKE YOUR TIME</div><h3>Watch. Wait. Walk.</h3><div class="statrow"><span>YOUR MOVES <b>${hr.moves}</b></span><span>PATROL <b>${hr.t+1}/12</b></span></div><div class="dpad"><span class="blank"></span><button data-dir="0,-1" aria-label="Move up">↑</button><span class="blank"></span><button data-dir="-1,0" aria-label="Move left">←</button><button data-dir="0,0" aria-label="Wait one turn">Wait</button><button data-dir="1,0" aria-label="Move right">→</button><span class="blank"></span><button data-dir="0,1" aria-label="Move down">↓</button></div><p><span class="key">↑ ↓ ← →</span> or <span class="key">W A S D</span><br><span class="key">Space</span> to wait.</p><div class="feedback" role="status">${feedback||'HR looks two tiles ahead. Don’t step into the current or next watched tiles.'}</div>`;document.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>move(...b.dataset.dir.split(',').map(Number)));}
-function move(dx,dy){if(!started||level!==2||hr.status!=='playing'||$('#overlay').innerHTML)return;const old=hr;hr=movePatrol(hr,dx,dy);feedback=hr===old?'That’s a cubicle. You are not a ghost.':dx===0&&dy===0?'You pretend to read the wellness poster.':'A completely normal amount of stealth.';renderHR();draw();beep(hr===old?170:360);if(hr.status==='won')win(2);if(hr.status==='lost')lose('HR would like a word.','“We noticed you were leaving at your contracted time. Is everything okay?”');}
-function introChase(){chaseIntro=true;$('#fileIncident').classList.add('fall');setMission('One last thing…','The exit is right there. Unfortunately, so is the world’s least stable stack of files.','<b>GOAL:</b> Survive 15 obstacle waves. Three hits and the boss catches you.');$('#interaction').innerHTML='<div class="label">INCIDENT REPORT #501</div><h3>A very loud paperwork error.</h3><p>You brush the cabinet. A file falls. Somewhere, a boss senses an unallocated evening.</p><p class="clue">Use ← → to change lanes. Jump clears low papers. Dodge tall cabinets.</p>';overlay('ACT 03 / ESCALATION','That was<br>not quiet.','THUD. “Before you go—”<br>The boss has entered pursuit mode.','Run for your evening',()=>{chaseIntro=false;$('#fileIncident').classList.remove('fall');clearOverlay();running=true;elapsed=0;$('#pause').disabled=false;renderChase()},'!');$('#sceneHint').textContent='Goal: dodge the boss’s final follow-up.';}
-function renderChase(){const w=wave(chase.wave);$('#interaction').innerHTML=`<div class="label">LIVE / ${calm?'CALM PACE':'REGULAR PACE'}</div><h3>Keep your evening.</h3><div class="statrow"><span>ESCAPE <b>${Math.min(chase.wave,15)}/15</b></span><span class="hearts" aria-label="${3-chase.strikes} chances left">${'●'.repeat(3-chase.strikes)}${'○'.repeat(chase.strikes)}</span></div><div class="meter"><div style="width:${chase.wave/15*100}%"></div></div><p class="clue"><b>NEXT CLEAR LANE: ${['LEFT','MIDDLE','RIGHT'][w.safe]}</b><br>Low paper stacks can be jumped. Tall cabinets cannot.</p><div class="runner-controls"><button id="left" aria-label="Switch to left lane">←</button><button id="jump">${chase.jump?'Jump armed ✓':'Jump ↑'}</button><button id="right" aria-label="Switch to right lane">→</button></div><p><span class="key">← →</span> to dodge · <span class="key">Space</span> to jump.<br>Jump lasts until this wave passes.</p><div class="feedback" role="status">${feedback||'“We’re a family!” he shouts, at sprinting speed.'}</div>`;$('#left').onclick=()=>lane(-1);$('#right').onclick=()=>lane(1);$('#jump').onclick=jump;$('#sceneHint').textContent=`Goal: reach the exit. Lane ${chase.lane+1} · ${chase.wave}/15 waves · ${3-chase.strikes} chances`;}
-function lane(d){if(!running||paused||chase.status!=='playing')return;chase.lane=Math.max(0,Math.min(2,chase.lane+d));renderChase();beep(400);draw();}
-function jump(){if(!running||paused||chase.status!=='playing')return;chase.jump=true;beep(650);renderChase();draw();}
-function win(n){completed.add(n);updateTabs();running=false;$('#pause').disabled=true;if(n===1){$('#interaction').innerHTML='<div class="label">ACT COMPLETE</div><h3>Inbox zero. Excuses two.</h3><p>Report delivered. Colleagues redirected. Your evening is still theoretically yours.</p>';overlay('ACT 01 / COMPLETE','Professionally<br>unavailable.','You finished the work and avoided two surprise meetings. Next: the HR corridor.','Sneak past HR',()=>startLevel(2),'✓')}if(n===2){overlay('ACT 02 / COMPLETE','A clean<br>performance review.','You passed HR without becoming an action item. Only the boss stands between you and freedom.','Find the final exit',()=>startLevel(3),'✓')}if(n===3){overlay('CLOCKED OUT / FINALLY','Meeting<br>declined.','You made it. The boss will have to put it in an email.<br><b>Your evening belongs to you.</b>','Do it all again',()=>{completed.clear();startLevel(1)},'↗');$('#interaction').innerHTML='<div class="label">OUT OF OFFICE</div><h3>All three acts. Zero overtime.</h3><p>Performance rating: suspiciously efficient.</p><p>Replay any act using the tabs above.</p>';$('#sceneBadge').textContent='OFFLINE IS A BEAUTIFUL STATUS.'}beep(880,.2);draw();}
-function lose(title,text){running=false;$('#pause').disabled=true;overlay('MANDATORY MEETING / TRY AGAIN',title,text,'Retry this act',()=>startLevel(level),'!');beep(140,.25);draw();}
-function togglePause(){if(!running)return;paused=!paused;$('#pause').textContent=paused?'▶ Resume':'Ⅱ Pause';if(paused)overlay('TIME OUT / NO MEETING REQUIRED','Take a<br>breather.','Your chase is paused. The boss can wait.','Back to escaping',togglePause,'Ⅱ');else clearOverlay();}
-$('#pause').onclick=togglePause;$('#restart').onclick=()=>startLevel(level);document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>startLevel(+b.dataset.level));
-function updateCalm(){$('#motion').textContent='Calm mode: '+(calm?'on':'off');$('#motion').setAttribute('aria-pressed',String(calm));}$('#motion').onclick=()=>{calm=!calm;elapsed=0;updateCalm();if(running)renderChase()};updateCalm();
-$('#help').onclick=()=>{if(running&&!paused)togglePause();$('#helpDialog').showModal()};$('#closeHelp').onclick=$('#helpDone').onclick=()=>$('#helpDialog').close();
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&running&&!paused)togglePause()});
-document.addEventListener('keydown',e=>{if($('#helpDialog').open)return;const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&!['BUTTON','INPUT','TEXTAREA'].includes(e.target.tagName))e.preventDefault();if(e.target.tagName==='BUTTON'&&(k===' '||k==='enter'))return;if(k==='p'){togglePause();return}if(!started||$('#overlay').innerHTML)return;if(level===2){const map={arrowup:[0,-1],w:[0,-1],arrowdown:[0,1],s:[0,1],arrowleft:[-1,0],a:[-1,0],arrowright:[1,0],d:[1,0],' ':[0,0]};if(map[k]){e.preventDefault();move(...map[k])}}if(level===3){if(k==='arrowleft'||k==='a'){e.preventDefault();lane(-1)}if(k==='arrowright'||k==='d'){e.preventDefault();lane(1)}if(k===' '||k==='arrowup'||k==='w'){e.preventDefault();jump()}}});
-// Original canvas artwork. No downloaded game assets.
-function rect(x,y,w,h,c,r=0){ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
-function line(x,y,a,b,c,width=1){ctx.strokeStyle=c;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(a,b);ctx.stroke()}
-function text(t,x,y,size=14,c='#e1ead4',align='left'){ctx.font=`600 ${size}px "DM Sans",sans-serif`;ctx.fillStyle=c;ctx.textAlign=align;ctx.fillText(t,x,y)}
-function circle(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
-function plant(x,y,s=1){ctx.save();ctx.translate(x,y);ctx.scale(s,s);rect(-13,-8,26,24,'#a4805c',5);rect(-11,-7,22,7,'#715d43',3);for(const [a,b,r]of[[-15,-19,13],[12,-22,14],[0,-34,15],[-4,-15,12]]){circle(a,b,r,'#4c7551');line(a,b,0,0,'#8eaa64',2)}ctx.restore()}
-function person(x,y,color='#d9f179',scale=1,label='',facing=1){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#0b201f66';ctx.beginPath();ctx.ellipse(3,17,19,8,0,0,7);ctx.fill();rect(-11,1,9,18,'#243e3f',3);rect(3,1,9,18,'#243e3f',3);rect(-12,16,11,5,'#102a2d',2);rect(3,16,12,5,'#102a2d',2);rect(-16,-26,32,32,color,8);rect(-20,-20,7,25,color,3);rect(13,-20,7,25,color,3);rect(-4,-23,8,13,'#f5f0d9',2);rect(-2,-15,4,14,'#48625f',1);circle(0,-38,14,'#e4b98a');rect(-14,-51,28,11,'#293b36',5);rect(-14,-46,5,12,'#293b36',2);circle(facing*5,-38,1.7,'#253e33');if(label){rect(-29,29,58,19,'#102a24df',5);text(label,0,42,10,'#e9f4db','center')}ctx.restore()}
-function desk(x,y,w=135,h=92){rect(x+6,y+8,w,h,'#172e2999',6);rect(x,y,w,h,'#68816a',5);rect(x+3,y+3,w-6,h-11,'#adad86',4);rect(x+5,y+h-10,w-10,7,'#7e9276',2);rect(x+w/2-23,y+10,46,30,'#243f39',4);rect(x+w/2-19,y+13,38,23,'#729d88',2);line(x+w/2-11,y+20,x+w/2+12,y+20,'#c5e8a0',2);line(x+w/2-11,y+26,x+w/2+4,y+26,'#a0c795',2);rect(x+w/2-2,y+39,4,8,'#36514a');rect(x+w/2-13,y+45,26,4,'#36514a',2);rect(x+w/2-23,y+55,46,13,'#dbdcc1',2);for(let i=0;i<6;i++)line(x+w/2-18+i*6,y+58,x+w/2-18+i*6,y+64,'#879b80');rect(x+13,y+15,20,26,'#d6dfba',2);line(x+17,y+22,x+28,y+22,'#899e7b');circle(x+w-18,y+52,8,'#ede8d0');circle(x+w-18,y+52,5,'#73553c');rect(x+w/2-23,y+h+8,46,28,'#375951',8);rect(x+w/2-21,y+h+9,42,17,'#5c7b66',6)}
-function office(){rect(0,0,960,640,'#203b33');rect(42,66,876,531,'#6a7f65',8);rect(49,72,862,518,'#61775f',4);for(let y=74;y<590;y+=43)for(let x=50;x<910;x+=43){rect(x,y,42,42,((x+y)/43|0)%2?'#637a60':'#687e65');line(x,y+42,x+43,y+42,'#536d5733')}rect(42,63,876,35,'#a2af8a',5);rect(42,95,876,11,'#3b5745');rect(42,106,12,478,'#899a77');rect(904,106,13,478,'#899a77');for(let x=110;x<800;x+=210){rect(x,64,145,30,'#294c43',3);rect(x+4,68,137,21,'#9dbfa3',1);line(x+74,68,x+74,89,'#446656',3)}rect(747,520,132,53,'#345745',5);text('EXIT  →',813,553,20,'#d8f897','center');plant(91,164,1.1);plant(872,181,1.1);plant(95,546,1.2);plant(868,478,1);desk(158,170);desk(362,170);desk(590,170);desk(158,378);desk(362,378);desk(590,378);for(let x of[145,349,577]){rect(x,154,160,10,'#b9c4a0',3);rect(x,154,10,136,'#91a783',3)}rect(775,207,77,114,'#b1b69b',5);rect(779,211,69,21,'#344d43',3);text('PAPER JAM',813,225,8,'#d8f5ad','center');for(let y=244;y<310;y+=30){rect(783,y,61,25,'#82977d',3);rect(806,y+8,15,4,'#d0d8bb',2)}rect(770,367,82,58,'#314f42',4);text('WE ARE',811,388,10,'#cbd7b7','center');text('A FAMILY.',811,406,12,'#d9edb7','center');person(430,316,'#b5bfbd',.9,'DEV');person(653,318,'#c79077',.9,'PRIYA');person(step<3?221:chat===0?600:477,step<3?326:348,'#d9f179',1.1,'YOU');text('OPERATIONS',95,613,11,'#9ab293');text('PLEASE ENJOY EACH MINUTE EQUALLY.',890,613,9,'#9ab293','right');if(step>=3){const x=chat===0?649:429;rect(x-48,220,96,32,'#eef1d9',8);text('Quick question?',x,240,11,'#355346','center')} }
-const gx=84,gy=104,sz=66;
-function grid(){rect(0,0,960,640,'#203b33');text('PEOPLE & CULTURE',84,83,18,'#e0e9cd');text('PATROL ROUTE  ·  FIXED',876,82,11,'#a3ba9b','right');for(let y=0;y<8;y++)for(let x=0;x<12;x++){rect(gx+x*sz,gy+y*sz,sz-2,sz-2,(x+y)%2?'#647c61':'#5f765c',3)}for(const[x,y]of patrol){circle(gx+x*sz+32,gy+y*sz+32,3,'#acc29b')}for(const[x,y]of sight(hr.t)){rect(gx+x*sz+2,gy+y*sz+2,sz-6,sz-6,'#e4a36e99',4);line(gx+x*sz+8,gy+y*sz+9,gx+x*sz+55,gy+y*sz+55,'#ecc28c88',2)}for(const[x,y]of walls){rect(gx+x*sz+2,gy+y*sz+4,60,58,'#2f4e40',4);rect(gx+x*sz+2,gy+y*sz,60,48,'#afb08a',4);rect(gx+x*sz+16,gy+y*sz+8,30,21,'#355448',3);rect(gx+x*sz+20,gy+y*sz+11,22,14,'#8eac8c',1);rect(gx+x*sz+20,gy+y*sz+34,23,7,'#e1dfbe',2)}rect(gx+10*sz+3,gy+sz+3,58,58,'#cfef83',5);text('EXIT',gx+10*sz+32,gy+sz+27,12,'#284f35','center');text('↑',gx+10*sz+32,gy+sz+49,22,'#284f35','center');const[a,b]=patrol[hr.t];person(gx+a*sz+32,gy+b*sz+43,'#d59a78',.8,'HR',hr.t<6?1:-1);person(gx+hr.x*sz+32,gy+hr.y*sz+43,'#d7f07d',.8,'YOU');}
-function runner(now=0){rect(0,0,960,640,'#18352f');const van=160,bottom=930;ctx.fillStyle='#607260';ctx.beginPath();ctx.moveTo(400,100);ctx.lineTo(560,100);ctx.lineTo(925,640);ctx.lineTo(35,640);ctx.fill();ctx.fillStyle='#334e41';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(400,100);ctx.lineTo(35,640);ctx.lineTo(0,640);ctx.fill();ctx.beginPath();ctx.moveTo(960,0);ctx.lineTo(560,100);ctx.lineTo(925,640);ctx.lineTo(960,640);ctx.fill();rect(420,44,120,62,'#b7d68d',4);text('EXIT  ↑',480,83,25,'#234c36','center');for(let i=1;i<=2;i++){line(400+160/3*i,100,35+890/3*i,640,'#b3c09966',3)}for(let j=0;j<8;j++){const p=((j/8)+(calm?0:elapsed/(calm?3200:2100)/8))%1,y=100+p*p*540;const half=80+(y-100)*.676;line(480-half,y,480+half,y,'#9aab8555',2)}for(let k=0;k<4;k++){const y=130+k*120;rect(55-k*9,y,98,64,'#71866a',4);rect(68-k*9,y+10,70,37,'#385647',3);rect(798+k*9,y,98,64,'#71866a',4);rect(812+k*9,y+10,70,37,'#385647',3)}text('NO RUNNING',116,117,12,'#b9c8a3','center');text('BE A TEAM PLAYER',843,117,10,'#b9c8a3','center');const duration=calm?3200:2100,progress=running?Math.min(1,elapsed/duration):.25;for(let ahead=1;ahead>=0;ahead--){const wi=Math.min(14,chase.wave+ahead),w=wave(wi),p=ahead===0?progress:.02;const y=135+p*380,spread=70+p*190;for(const lane of[w.low,w.high]){const x=480+(lane-1)*spread,s=.35+p*.8;ctx.save();ctx.translate(x,y);ctx.scale(s,s);if(lane===w.high){rect(-40,-65,80,98,'#b5b59b',5);for(let k=0;k<3;k++){rect(-34,-58+k*29,68,24,'#7c9580',2);rect(-10,-49+k*29,20,5,'#dbe2c5',2)}text('FILES',0,-78,12,'#f1edce','center')}else{for(let j=0;j<4;j++){rect(-36+j*2,5-j*7,70,12,j%2?'#dbd8b7':'#f1e9c8',2)}text('JUMP',0,-30,12,'#eff5cc','center')}ctx.restore()}}const px=480+(chase.lane-1)*238;person(px,538-(chase.jump?35:0),'#d9f179',1.5,'YOU');person(480,628,'#c98570',.9,'BOSS');if(chaseIntro){rect(610,400,55,70,'#e5dbb6',3);text('Q4',637,441,17,'#526d4b','center');text('THUD!',672,390,24,'#f2d6a0','center')}if(chase.hit&&elapsed<450){rect(0,0,960,640,'#c46c4522')}if(paused)text('PAUSED',480,145,18,'#e2efcc','center');}
-function draw(now=0){ctx.clearRect(0,0,960,640);if(level===1)office();else if(level===2)grid();else runner(now);}
-function frame(t){const delta=last?Math.min(t-last,100):0;last=t;if(running&&!paused&&!document.hidden){elapsed+=delta;if(elapsed>=(calm?3200:2100)){elapsed=0;chase=resolveWave(chase);feedback=chase.hit?'You hit an obstacle. The boss gets closer.':'Another meeting successfully avoided.';beep(chase.hit?150:500);renderChase();if(chase.status==='lost')lose('Caught in<br>a meeting.','“This will only take five minutes.”<br>It will not. Try switching lanes earlier, or turn on Calm mode.');if(chase.status==='won')win(3);}draw(t)}requestAnimationFrame(frame)}
-$('#interaction').innerHTML='<div class="label">YOUR TOOLS</div><h3>A little wit. A little timing.</h3><p>Read the room. Find the route.<br>Run when professionalism fails.</p><div class="statrow"><span>3 SHORT ACTS</span><span>NO OVERTIME</span></div>';
-overlay('A SMALL GAME ABOUT A BIG BOUNDARY','It’s 5:01.<br>Make your exit.','Your work is done. Almost.<br>Outsmart the office and reclaim your evening.','Clock out → start game',()=>startLevel(1));draw();requestAnimationFrame(frame);
+import {
+  fresh,
+  move,
+  nearby,
+  objective,
+  advance,
+  canExit,
+  retry,
+  restart,
+  newStealth,
+  tickStealth,
+  distract,
+  hide,
+  newChase,
+  chaseAction,
+  tickChase,
+  pressGate,
+  wave,
+} from "./engine.js";
+import { MAPS, names } from "./world.js";
+import { interact, clues } from "./story.js";
+import { readSave, writeSave, SAVE_KEY } from "./save.js";
+import { render, person } from "./render.js";
+import { Sound } from "./audio.js";
+const $ = (s) => document.querySelector(s),
+  canvas = $("#game"),
+  ctx = canvas.getContext("2d"),
+  overlay = $("#overlay"),
+  sound = new Sound();
+let storage;
+try {
+  storage = localStorage;
+} catch {
+  storage = {
+    getItem: () => null,
+    setItem: () => {
+      throw Error("Storage unavailable");
+    },
+  };
+}
+let saved = readSave(storage),
+  state = saved || fresh(),
+  mode = "title",
+  panel = null,
+  time = 0,
+  walking = false,
+  toastTime = 0,
+  last = 0,
+  lastHud = "",
+  activeObject = null;
+let stealth = newStealth(),
+  chase = newChase(),
+  keys = new Set(),
+  selected = 0;
+const local = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname),
+  params = new URLSearchParams(location.search),
+  testing = local && params.get("test") === "1",
+  demo = local && params.get("demo") === "1";
+if (!saved)
+  state.settings.reduced = matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+function toast(text) {
+  $("#toast").textContent = text;
+  toastTime = 4;
+}
+function save() {
+  if (demo) return true;
+  const ok = writeSave(storage, state);
+  saved = ok ? structuredClone(state) : saved;
+  if (!ok) toast("Save unavailable. Keep this tab open to retain progress.");
+  return ok;
+}
+function close() {
+  overlay.replaceChildren();
+  panel = null;
+  keys.clear();
+  activeObject = null;
+  canvas.focus();
+}
+function show(title, text, choices, kind = "menu", speaker = "YOU") {
+  keys.clear();
+  panel = kind;
+  overlay.replaceChildren();
+  const box = document.createElement("section");
+  box.className =
+    "box " +
+    (kind === "dialogue" ? "dialogue" : kind === "title" ? "title-menu" : "");
+  box.setAttribute("role", "dialog");
+  box.setAttribute("aria-label", title);
+  box.setAttribute("aria-modal", "true");
+  const head = document.createElement("div");
+  head.className = "speaker";
+  if (kind === "dialogue") {
+    const portrait = document.createElement("canvas");
+    portrait.width = 48;
+    portrait.height = 48;
+    portrait.className = "portrait";
+    portrait.setAttribute("aria-hidden", "true");
+    const who = speaker.toLowerCase().split(" ")[0];
+    person(
+      portrait.getContext("2d"),
+      24,
+      44,
+      who === "priya" ? "#cc789e" : who === "maya" ? "#d5a454" : "#65cbb7",
+      0,
+      false,
+      1.57,
+      who,
+      1.6,
+    );
+    head.append(portrait);
+  }
+  const h = document.createElement("h2");
+  h.textContent = title;
+  head.append(h);
+  box.append(head);
+  if (text) {
+    const p = document.createElement("p");
+    p.textContent = text;
+    box.append(p);
+  }
+  const list = document.createElement("div");
+  list.className = "choices";
+  for (const item of choices) {
+    const b = document.createElement("button");
+    b.textContent = item.label;
+    b.onclick = () => {
+      sound.unlock();
+      sound.effect("click", state.settings);
+      item.run();
+    };
+    list.append(b);
+  }
+  box.append(list);
+  overlay.append(box);
+  selected = 0;
+  list.querySelector("button")?.focus();
+  return box;
+}
+const back = (label = "Back") => ({ label, run: () => close() });
+function title() {
+  mode = "title";
+  $("#hud").hidden = true;
+  $("#prompt").textContent = "";
+  $("#toast").textContent = "";
+  const choices = [];
+  if (saved)
+    choices.push({
+      label: "Continue",
+      run: () => {
+        state = readSave(storage) || state;
+        start(false);
+      },
+    });
+  choices.push({
+    label: "New Game",
+    run: () => {
+      if (saved)
+        show(
+          "REPLACE SAVED GAME?",
+          "This starts a new evening and replaces your checkpoint.",
+          [
+            { label: "Keep my save", run: title },
+            { label: "Start a new game", run: newGame },
+          ],
+        );
+      else newGame();
+    },
+  });
+  choices.push(
+    { label: "Settings", run: () => settings(title) },
+    { label: "Credits", run: () => credits(title) },
+  );
+  if (demo) choices.push({ label: "Developer demo", run: demoMenu });
+  show("YOU’RE THE DISTRACTION", "", choices, "title");
+}
+function newGame() {
+  state = fresh(state.settings);
+  save();
+  mode = "play";
+  stealth = newStealth();
+  chase = newChase();
+  show(
+    "17:01 / THE CUBICLE",
+    "Your shift ended one minute ago. Your report did not.\n\nPriya needs a handoff. Dev needs reassurance. Maya needs a number. You need your evening.\n\nMove with WASD or arrows. Stand near a gold-marked object and press E. Your email archive is the desk just east of you.",
+    [
+      {
+        label: "Clock out. Somehow.",
+        run: () => {
+          close();
+          toast(
+            "J opens your journal. E interacts. Progress saves after discoveries.",
+          );
+        },
+      },
+    ],
+    "dialogue",
+  );
+}
+function start(intro = true) {
+  mode = "play";
+  close();
+  stealth = newStealth();
+  chase = newChase(state.chaseCheckpoint);
+  if (state.complete) {
+    ending();
+    return;
+  }
+  if (intro && state.level === 3) chaseIntro();
+  else toast("Checkpoint restored. " + objective(state));
+}
+function actSummary(n) {
+  const seconds = Math.round(state.stats.seconds[n - 1]);
+  return `${Math.floor(seconds / 60)}m ${seconds % 60}s active play · ${state.stats.retries} total retries · ${state.stats.hints} hints`;
+}
+function doInteract(answer) {
+  if (state.level === 3) {
+    if (pressGate(chase)) {
+      toast("GATE RELEASED. Keep moving!");
+      sound.effect("win", state.settings);
+    }
+    return;
+  }
+  const o = activeObject || nearby(state);
+  if (!o) return;
+  if (!activeObject || activeObject.id !== o.id) {
+    const current = nearby(state);
+    if (!current || current.id !== o.id) return;
+  }
+  if (state.level === 2 && ["phone", "noisePrinter"].includes(o.id)) {
+    toast(
+      distract(state, stealth, o.id)
+        ? "Noise triggered. HR is investigating for 13 seconds."
+        : "Device cooling down. Try again in a moment.",
+    );
+    save();
+    return;
+  }
+  if (o.type === "hide") {
+    toast(hide(state, stealth));
+    return;
+  }
+  const response = interact(state, o.id, answer);
+  activeObject = o;
+  if (response.disable) stealth.disable = 45;
+  if (response.release) stealth.release = 60;
+  if (response.alarm) stealth.suspicion = Math.min(95, stealth.suspicion + 40);
+  save();
+  sound.effect(response.exit ? "win" : "click", state.settings);
+  if (response.exit) {
+    if (!canExit(state)) return;
+    const completed = state.level;
+    if (!advance(state)) return;
+    save();
+    stealth = newStealth();
+    chase = newChase();
+    show(
+      completed === 1 ? "YOU HAVE ESCAPED YOUR TEAM" : "HR HAS LOST YOUR FILE",
+      response.text + "\n\n" + actSummary(completed),
+      [
+        {
+          label: completed === 1 ? "HR would like a word." : "Take the stairs.",
+          run: () => {
+            close();
+            if (state.level === 3) chaseIntro();
+            else toast("Watch cones. Hiding is temporary. J has the plan.");
+          },
+        },
+      ],
+    );
+    return;
+  }
+  const actions = response.choices.map((a) => ({
+    label: a.label,
+    run: () => doInteract(a.id),
+  }));
+  actions.push({
+    label: response.choices.length ? "Leave conversation" : "Continue",
+    run: () => close(),
+  });
+  show(response.speaker, response.text, actions, "dialogue", response.speaker);
+  activeObject = o;
+}
+function chaseIntro() {
+  show(
+    "THE FINAL FOLLOW-UP",
+    "A file slips. Paper scatters across the stairwell.\n\nTHUD.\n\nThe office goes quiet. A silhouette turns.\nBOSS: “Leaving already?”\nBOSS: “I’ve got one last thing for you.”",
+    [
+      {
+        label: "Run! (Skip / continue)",
+        run: () => {
+          close();
+          show(
+            "RUN. THE BOSS IS COMING.",
+            "← → / A D: change lanes. Space / ↑: jump PAPER. ↓ / S: slide BARS. Dodge CABINETS.\n\nTime actions as obstacles reach the gold contact line. Each lasts 0.68 seconds. Carts shift in phases 2–3. The last gate needs E in the center lane.\n\nCheckpoints after waves 20, 40 and 56.",
+            [
+              {
+                label: "I’m not available.",
+                run: () => {
+                  close();
+                  toast("Phase 1 / Office panic");
+                },
+              },
+            ],
+          );
+        },
+      },
+    ],
+    "dialogue",
+    "BOSS",
+  );
+}
+function failure(reason) {
+  save();
+  show(
+    state.level === 2 ? "HR WOULD LIKE A WORD" : "MEETING ACCEPTED",
+    reason +
+      "\n\n" +
+      (state.level === 2
+        ? "Discoveries are safe. Break sight before the meter fills."
+        : "Time jump / slide at the gold line. Pressure falls after clean waves."),
+    [
+      {
+        label: "Retry checkpoint",
+        run: () => {
+          retry(state);
+          stealth = newStealth();
+          chase = newChase(state.chaseCheckpoint);
+          save();
+          close();
+        },
+      },
+      { label: "Adjust pacing", run: () => settings(() => failure(reason)) },
+    ],
+    "failure",
+  );
+  sound.effect("error", state.settings);
+}
+function ending() {
+  mode = "ending";
+  save();
+  show(
+    "YOU’RE THE DISTRACTION",
+    "Outside, Priya, Dev and Maya are waiting.\n\nPRIYA: “While he chased you, we all left.”\nDEV: “For once, that meeting helped the whole team.”\nMAYA: “Tomorrow, we leave together.”\n\nYou weren’t avoiding the work. You were the distraction that let everyone go home.\n\n" +
+      state.stats.seconds
+        .map((_, i) => `Act ${i + 1}: ${Math.round(state.stats.seconds[i])}s`)
+        .join(" · ") +
+      `\n${state.stats.retries} retries · ${state.stats.detections} detections · ${state.stats.collisions} collisions`,
+    [
+      { label: "The evening is ours. / Credits", run: () => credits(title) },
+      { label: "Return to title", run: title },
+    ],
+  );
+  sound.effect("win", state.settings);
+}
+function credits(next) {
+  show(
+    "CLOCKED OUT",
+    "YOU’RE THE DISTRACTION\nTeam Index 0 · Pixathon\n\nCorporate Sapphire edition\nOriginal procedural pixel artwork and synthesized audio.\nBuilt with Canvas, JavaScript and Web Audio.\nAI-assisted engineering; actual process recorded in AI_LOG.md.\n\nNo office emails were answered after hours in the making of this escape.",
+    [{ label: "Return", run: next }],
+  );
+}
+function pause() {
+  if (mode === "title") {
+    title();
+    return;
+  }
+  show("PAUSED / THE BOSS CAN WAIT", objective(state), [
+    { label: "Resume", run: () => close() },
+    { label: "Inventory & clues [I]", run: inventory },
+    { label: "Journal & hints [J]", run: journal },
+    { label: "Settings & controls", run: () => settings(pause) },
+    {
+      label: "Restart current level",
+      run: () =>
+        show(
+          "RESTART THIS ACT?",
+          "Clears this act’s objectives and returns to its beginning. Earlier acts remain complete.",
+          [
+            { label: "Cancel", run: pause },
+            {
+              label: "Restart act",
+              run: () => {
+                restart(state);
+                save();
+                start();
+              },
+            },
+          ],
+        ),
+    },
+    {
+      label: "Save & return to title",
+      run: () => {
+        save();
+        title();
+      },
+    },
+  ]);
+}
+function inventory() {
+  show(
+    "BAG / EVIDENCE",
+    state.inventory.length
+      ? state.inventory.map((i) => "• " + i).join("\n") +
+          "\n\n" +
+          clues(state).join("\n")
+      : "No items yet. Explore the office; look for gold marks.",
+    [back("Back to game")],
+  );
+}
+function journal() {
+  show(
+    "JOURNAL / " + names[state.level - 1],
+    objective(state) +
+      "\n\n" +
+      clues(state).join("\n") +
+      "\n\n" +
+      (state.level === 1
+        ? "Email: northwest desks. Board: north center. Maya: southwest. Meeting: southeast. Elevator: northeast."
+        : state.level === 2
+          ? "West → Records → Security. North and south passages cross each partition. The mini-map marks walls and your position."
+          : "Paper: jump. Bars: slide. Cabinets: dodge. Moving rows rotate right before contact. The final switch needs E."),
+    [
+      {
+        label: "Request a hint (+1 recorded)",
+        run: () => {
+          state.stats.hints++;
+          save();
+          show("A SMALL NUDGE", hint(), [back("Back to game")]);
+        },
+      },
+      back("Back to game"),
+    ],
+  );
+}
+function hint() {
+  const f = state.flags;
+  if (state.level === 1) {
+    if (!f.meeting)
+      return "Email says closing hour 17. Board says audit day 24. Join them: 2417. Maya signs the total 184.";
+    if (!f.printer)
+      return "Collect the fuse west. Get Maya’s signature. Route Triangle → Circle → Square.";
+    if (!f.report)
+      return "Revision 6 has the signed total 184. Submit it after printing.";
+    return "Share the submitted report with Priya and give Dev the written summary. Show the elevator your receipt.";
+  }
+  if (state.level === 2)
+    return "Use the west printer, then cross into Records at row 8 or 19. Visitor pass is north; circuit note is south. Security in the east uses circuit B. Phone in the southeast diverts HR. North release starts a 60-second window to the south fire stairs.";
+  return "Act when the obstacle is about one character-height above the gold line. Jump and slide expire; holding a key does not retrigger them. At wave 57 take center and press E once the switch crosses halfway.";
+}
+function settings(next = () => close()) {
+  const box = show(
+    "SETTINGS & CONTROLS",
+    "WASD / arrows: move. E / Enter: interact. Space: interact or jump. S / ↓: slide in chase. I: bag. J: journal. Esc: pause.\nMenus: arrows, Enter, Tab or touch.",
+    [],
+    "settings",
+  );
+  box.classList.add("settings");
+  for (const [key, label] of [
+    ["music", "Music volume"],
+    ["sound", "Sound volume"],
+  ]) {
+    const row = document.createElement("label");
+    row.textContent = label;
+    const input = document.createElement("input");
+    input.type = "range";
+    input.min = "0";
+    input.max = "1";
+    input.step = ".05";
+    input.value = state.settings[key];
+    input.setAttribute("aria-label", label);
+    input.oninput = () => {
+      state.settings[key] = +input.value;
+      save();
+    };
+    row.append(input);
+    box.append(row);
+  }
+  for (const [key, label] of [
+    ["mute", "Mute all audio"],
+    ["reduced", "Reduce motion"],
+    ["large", "Larger dialogue"],
+    ["pace", "Assist pacing (slower hazards)"],
+  ]) {
+    const row = document.createElement("label");
+    row.textContent = label;
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked =
+      key === "pace" ? state.settings.pace === "assist" : state.settings[key];
+    input.onchange = () => {
+      state.settings[key] =
+        key === "pace"
+          ? input.checked
+            ? "assist"
+            : "standard"
+          : input.checked;
+      save();
+      applySettings();
+    };
+    row.append(input);
+    box.append(row);
+  }
+  const actions = document.createElement("div");
+  actions.className = "choices";
+  for (const a of [
+    {
+      label: "Fullscreen",
+      run: () => {
+        if (document.fullscreenElement) document.exitFullscreen?.();
+        else
+          $("#screen")
+            .requestFullscreen?.()
+            .catch(() => toast("Fullscreen is unavailable in this browser."));
+      },
+    },
+    {
+      label: "Reset all progress",
+      run: () =>
+        show(
+          "RESET PROGRESS?",
+          "This removes the saved game from this browser.",
+          [
+            { label: "Cancel", run: () => settings(next) },
+            {
+              label: "Reset permanently",
+              run: () => {
+                try {
+                  storage.removeItem(SAVE_KEY);
+                } catch {}
+                saved = null;
+                state = fresh(state.settings);
+                title();
+              },
+            },
+          ],
+        ),
+    },
+    { label: "Back", run: next },
+  ]) {
+    const b = document.createElement("button");
+    b.textContent = a.label;
+    b.onclick = a.run;
+    actions.append(b);
+  }
+  box.append(actions);
+  box.querySelector("input")?.focus();
+}
+function applySettings() {
+  $("#screen").classList.toggle("large", state.settings.large);
+}
+function demoMenu() {
+  show(
+    "LOCAL DEVELOPER DEMO",
+    "Only enabled on localhost with ?demo=1. Demo progress is temporary. Normal saved progress is never replaced.",
+    [1, 2, 3]
+      .map((n) => ({
+        label: "Demo act " + n,
+        run: () => {
+          state = fresh();
+          if (n > 1)
+            for (const k of [
+              "email",
+              "board",
+              "authorized",
+              "meeting",
+              "printer",
+              "report",
+              "priya",
+              "dev",
+              "receipt",
+            ])
+              state.flags[k] = true;
+          if (n === 3)
+            for (const k of [
+              "pass",
+              "log",
+              "terminal",
+              "phone",
+              "noisePrinter",
+            ])
+              state.flags[k] = true;
+          state.level = n;
+          state.unlocked = n;
+          state.player = { x: 3.5, y: 24.5, face: 0 };
+          start();
+        },
+      }))
+      .concat([{ label: "Back", run: title }]),
+  );
+}
+const directions = {
+  w: [0, -1],
+  arrowup: [0, -1],
+  s: [0, 1],
+  arrowdown: [0, 1],
+  a: [-1, 0],
+  arrowleft: [-1, 0],
+  d: [1, 0],
+  arrowright: [1, 0],
+};
+function press(k) {
+  sound.unlock();
+  if (panel) {
+    if (k === "escape") {
+      if (panel === "title" || panel === "failure") return;
+      if (mode === "play") close();
+      else title();
+      return;
+    }
+    if (
+      ["arrowup", "arrowdown", "w", "s"].includes(k) &&
+      document.activeElement?.tagName !== "INPUT"
+    ) {
+      const buttons = [...overlay.querySelectorAll("button")];
+      if (!buttons.length) return;
+      selected =
+        (buttons.indexOf(document.activeElement) +
+          (k === "arrowup" || k === "w" ? -1 : 1) +
+          buttons.length) %
+        buttons.length;
+      buttons[selected].focus();
+      return;
+    }
+    if (
+      ["e", " ", "enter"].includes(k) &&
+      document.activeElement?.tagName === "BUTTON"
+    )
+      document.activeElement.click();
+    return;
+  }
+  if (k === "escape") {
+    pause();
+    return;
+  }
+  if (k === "i") {
+    inventory();
+    return;
+  }
+  if (k === "j") {
+    journal();
+    return;
+  }
+  if (mode !== "play") return;
+  if (state.level === 3) {
+    if (["a", "arrowleft"].includes(k)) chaseAction(chase, "left");
+    if (["d", "arrowright"].includes(k)) chaseAction(chase, "right");
+    if ([" ", "w", "arrowup"].includes(k)) chaseAction(chase, "jump");
+    if (["s", "arrowdown"].includes(k)) chaseAction(chase, "slide");
+    if (["e", "enter"].includes(k)) doInteract();
+  } else if (["e", "enter", " "].includes(k)) doInteract();
+}
+document.addEventListener("keydown", (e) => {
+  const k = e.key.toLowerCase();
+  if (e.target.tagName === "INPUT") return;
+  if (
+    [
+      " ",
+      "enter",
+      "arrowup",
+      "arrowdown",
+      "arrowleft",
+      "arrowright",
+      "escape",
+    ].includes(k)
+  )
+    e.preventDefault();
+  if (e.repeat) return;
+  keys.add(k);
+  press(k);
+});
+document.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+window.addEventListener("blur", () => {
+  keys.clear();
+  if (mode === "play" && !panel) pause();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    keys.clear();
+    if (mode === "play" && !panel) pause();
+  }
+});
+$("#pause").onclick = pause;
+for (const b of document.querySelectorAll("[data-hold]")) {
+  b.onpointerdown = (e) => {
+    e.preventDefault();
+    b.setPointerCapture(e.pointerId);
+    keys.add(b.dataset.hold);
+    press(b.dataset.hold);
+  };
+  b.onpointerup = b.onpointercancel = () => keys.delete(b.dataset.hold);
+}
+for (const b of document.querySelectorAll("[data-press]"))
+  b.onclick = () => press(b.dataset.press);
+function tick(dt) {
+  time += state.settings.reduced ? 0 : dt;
+  walking = false;
+  if (toastTime > 0) {
+    toastTime -= dt;
+    if (toastTime <= 0) $("#toast").textContent = "";
+  }
+  if (mode === "play" && !panel && !state.complete) {
+    state.stats.seconds[state.level - 1] += dt;
+    if (state.level < 3) {
+      if (!stealth.hidden || state.level === 1) {
+        const k = [...keys].reverse().find((k) => directions[k]);
+        if (k) {
+          const d = directions[k];
+          walking = move(MAPS[state.level], state.player, ...d, dt);
+        }
+      }
+      if (state.level === 2 && tickStealth(state, stealth, dt) === "caught")
+        failure(
+          `${stealth.source} filled the detection meter. “Your calendar says you’re available.”`,
+        );
+    } else {
+      const event = tickChase(chase, state, dt);
+      if (event === "lost")
+        failure(
+          chase.wave >= 56 && !chase.gate
+            ? "The final release was missed. At wave 57, press E in the center lane after the switch crosses halfway."
+            : "The boss caught up. “Let’s put some time in.”",
+        );
+      if (event === "won") ending();
+      if (event === "checkpoint") {
+        save();
+        toast(
+          "CHECKPOINT · " +
+            (chase.wave === 20
+              ? "Corridor gauntlet"
+              : chase.wave === 40
+                ? "The final exit"
+                : "Release ahead"),
+        );
+        sound.effect("win", state.settings);
+      }
+      if (event === "hit") {
+        toast("Collision! Pursuit +24");
+        sound.effect("error", state.settings);
+      }
+      if (event === "clean" && chase.wave % 5 === 0)
+        toast("Clean sequence. Pursuit falling.");
+    }
+  }
+  sound.update(dt, state.level, state.settings, mode === "play" && !panel);
+  draw();
+}
+function draw() {
+  const near = state.level < 3 ? nearby(state) : null;
+  render(ctx, state, {
+    mode,
+    time,
+    walking,
+    near: panel ? null : near,
+    stealth,
+    chase,
+  });
+  $("#hud").hidden = mode !== "play";
+  const hud =
+    state.level === 1
+      ? `ATTENTION ${state.attention}/5`
+      : state.level === 2
+        ? `${stealth.hidden ? "HIDDEN " + Math.ceil(stealth.hidden) + "s" : "DETECTION " + Math.round(stealth.suspicion) + "%"}${stealth.release ? " · EXIT " + Math.ceil(stealth.release) + "s" : ""}`
+        : `PURSUIT ${Math.round(chase.pressure)}% · ${Math.min(60, chase.wave + 1)}/60`;
+  if (lastHud !== hud) {
+    $("#danger").textContent = hud;
+    lastHud = hud;
+  }
+  $("#act").textContent = `0${state.level} / ${names[state.level - 1]}`;
+  const prompt =
+    mode === "play" && !panel
+      ? state.level === 3
+        ? "← → lanes · ↑ / Space jump · ↓ slide · E switch"
+        : near
+          ? "E / " + near.name
+          : state.level === 2
+            ? "Stay out of striped sight areas · J journal"
+            : "Explore · Gold marks = interact · J journal"
+      : "";
+  if ($("#prompt").textContent !== prompt) $("#prompt").textContent = prompt;
+}
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000 || 0);
+  last = now;
+  if (!testing) tick(dt);
+  else draw();
+  requestAnimationFrame(frame);
+}
+// Read-only snapshots plus deterministic clock for browser tests. No progression mutation API.
+if (testing)
+  window.gameTest = {
+    snapshot: () => structuredClone({ state, stealth, chase, mode, panel }),
+    step: (seconds) => {
+      for (let t = 0; t < seconds; t += 0.025)
+        tick(Math.min(0.025, seconds - t));
+    },
+  };
+applySettings();
+title();
+requestAnimationFrame(frame);

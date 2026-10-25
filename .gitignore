@@ -7,3 +7,8 @@ node_modules/
 Thumbs.db
 
 # Buildless game source lives in dist and must be versioned.
+
+build/
+test-results/
+playwright-report/
+
